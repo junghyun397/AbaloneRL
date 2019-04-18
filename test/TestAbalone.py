@@ -24,11 +24,21 @@ class TestAbalone(unittest.TestCase):
 
     def test_valid_pos(self):
         # Model 3
-        self.assertTrue(model3.check_pos(0, 0))
-        self.assertTrue(model3.check_pos(1, 3))
-        self.assertTrue(model3.check_pos(2, 4))
+        self.assertTrue(model3.check_valid_pos(0, 0))
+        self.assertTrue(model3.check_valid_pos(1, 3))
+        self.assertTrue(model3.check_valid_pos(2, 4))
 
-        self.assertFalse(model3.check_pos(3, 0))
-        self.assertFalse(model3.check_pos(4, 1))
-        self.assertFalse(model3.check_pos(5, 1))
-        self.assertFalse(model3.check_pos(4, 5))
+        self.assertFalse(model3.check_valid_pos(3, 0))
+        self.assertFalse(model3.check_valid_pos(4, 1))
+        self.assertFalse(model3.check_valid_pos(5, 1))
+        self.assertFalse(model3.check_valid_pos(4, 5))
+
+        # Model 5
+        self.assertTrue(model5.check_valid_pos(0, 0))
+        self.assertTrue(model5.check_valid_pos(2, 6))
+        self.assertTrue(model5.check_valid_pos(4, 8))
+        self.assertTrue(model5.check_valid_pos(5, 8))
+
+        self.assertFalse(model5.check_valid_pos(5, 0))
+        self.assertFalse(model5.check_valid_pos(6, 1))
+        self.assertFalse(model5.check_valid_pos(8, 3))
