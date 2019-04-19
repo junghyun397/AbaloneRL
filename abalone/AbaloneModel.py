@@ -26,16 +26,28 @@ class AbaloneModel:
         self.out_black = out_black
         self.out_white = out_white
 
+    # Game Control
+
+    def next_turn(self) -> Optional[StoneColor]:
+        if self.out_white > 5:
+            return StoneColor.BLACK
+        elif self.out_black > 5:
+            return StoneColor.WHITE
+
+        self.turns += 1
+        self._flip_color()
+        return None
+
     # Logic Filed Control
 
-    def try_pull_stone(self, x: int, y: int, description: HexDescription) -> bool:
-        line = self.can_pull_stone(x, y, description)
+    def try_push_stone(self, x: int, y: int, description: HexDescription) -> bool:
+        line = self.can_push_stone(x, y, description)
         if line is not None:
-            self.pull_stone(x, y, description, line)
+            self.push_stone(x, y, description, line)
             return True
         return False
 
-    def can_pull_stone(self, x: int, y: int, description: HexDescription) -> Optional[list]:
+    def can_push_stone(self, x: int, y: int, description: HexDescription) -> Optional[list]:
         line = self.get_line(x, y, description)
         my_count, opp_count = 0, 0
         for s in line:
@@ -52,7 +64,7 @@ class AbaloneModel:
                 return None
         return line
 
-    def pull_stone(self, x: int, y: int, description: HexDescription, line: list = None) -> None:
+    def push_stone(self, x: int, y: int, description: HexDescription, line: list = None) -> None:
         if line is None:
             line = self.get_line(x, y, description)
 
@@ -64,6 +76,8 @@ class AbaloneModel:
         line = [0] + line
         line.pop()
         self.set_line(x, y, description, line)
+
+    # Bin Field Control
 
     def get_line(self, x: int, y: int, description: HexDescription) -> list:
         if description == HexDescription.XP:
@@ -111,13 +125,11 @@ class AbaloneModel:
             for index in range(len(line)):
                 self.field[self.get_1d_pos(y - index, x - index)] = line[index]
 
-    # Bin Field Control
+    def set_field_stone(self, y: int, x: int, color: StoneColor) -> None:
+        self.field[self.get_1d_pos(y, x)] = color
 
-    def set_field_stone(self, index: int, color: StoneColor) -> None:
-        self.field[index] = color
-
-    def get_field_stone(self, index: int) -> int:
-        return self.field[index]
+    def get_field_stone(self, y: int, x: int) -> int:
+        return self.field[self.get_1d_pos(y, x)]
 
     # Position Data
 
@@ -144,10 +156,6 @@ class AbaloneModel:
         return np.copy(self.field)
 
     # Private
-
-    def _next_turn(self) -> None:
-        self.turns += 1
-        self._flip_color()
 
     def _flip_color(self) -> None:
         if self.cur_color == StoneColor.BLACK:
