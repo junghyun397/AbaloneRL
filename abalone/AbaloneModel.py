@@ -6,6 +6,10 @@ from abalone.HexDescription import HexDescription
 from abalone.StoneColor import StoneColor
 
 
+def new_field(size: int) -> np.ndarray:
+    return np.zeros((3 * pow(size, 2) - 3 * size + 1,))
+
+
 class AbaloneModel:
 
     def __init__(self,
@@ -17,7 +21,7 @@ class AbaloneModel:
                  out_white: int = 0):
         self.edge_size = edge_size
         if field is None:
-            field = np.zeros((3 * pow(edge_size, 2) - 3 * edge_size + 1,))
+            field = new_field(edge_size)
         self.field = field
 
         self.turns = turns
@@ -26,17 +30,20 @@ class AbaloneModel:
         self.out_black = out_black
         self.out_white = out_white
 
+        self._cur_out_black = 0
+        self._cur_out_white = 0
+
     # Game Control
 
-    def next_turn(self) -> Optional[StoneColor]:
-        if self.out_white > 5:
-            return StoneColor.BLACK
-        elif self.out_black > 5:
-            return StoneColor.WHITE
+    def next_turn(self) -> (int, int, Optional[StoneColor]):
+        self.out_black += self._cur_out_black
+        self.out_white += self._cur_out_white
+        temp_out_black, temp_out_white = self._cur_out_black, self._cur_out_white
 
+        self._cur_out_black, self._cur_out_white = 0, 0
         self.turns += 1
         self._flip_color()
-        return None
+        return temp_out_black, temp_out_white, self.get_win()
 
     # Logic Filed Control
 
@@ -77,6 +84,15 @@ class AbaloneModel:
         line.pop()
         self.set_line(x, y, description, line)
 
+    # Game Observe
+
+    def get_win(self) -> Optional[StoneColor]:
+        if self.out_white > 5:
+            return StoneColor.BLACK
+        elif self.out_black > 5:
+            return StoneColor.WHITE
+        return None
+
     # Bin Field Control
 
     def get_line(self, x: int, y: int, description: HexDescription) -> list:
@@ -101,7 +117,8 @@ class AbaloneModel:
             else:
                 return [self.field[self.get_1d_pos(yp, x)] for yp in reversed(range(x - self.edge_size + 1, x))]
         elif description == HexDescription.ZP:
-            return [self.field[self.get_1d_pos(yp, xp)] for yp, xp in zip(range(y, self.edge_size * 2 - 2), range(x, self.edge_size * 2 - 2))]
+            return [self.field[self.get_1d_pos(yp, xp)] for yp, xp in
+                    zip(range(y, self.edge_size * 2 - 2), range(x, self.edge_size * 2 - 2))]
         elif description == HexDescription.ZM:
             return [self.field[self.get_1d_pos(yp, xp)] for yp, xp in zip(reversed(range(0, y)), reversed(range(0, x)))]
 
@@ -139,6 +156,12 @@ class AbaloneModel:
         else:
             return int((y * (-y + 6 * self.edge_size - 5) + -2 * self.edge_size * (self.edge_size - 2) - 2) / 2) + x
 
+    def get_2d_pos(self, index: int) -> (int, int):
+        pass
+
+    def get_end_point(self, x: int, y: int, description: HexDescription) -> int:
+        pass
+
     def check_valid_pos(self, y: int, x: int) -> bool:
         if y < self.edge_size:
             return y < self.edge_size * 2 and self.edge_size + y > x > -1
@@ -147,10 +170,16 @@ class AbaloneModel:
 
     # Bin Data
 
+    def reset(self) -> None:
+        self.field = new_field(self.edge_size)
+        self.turns = 0
+        self.cur_color = StoneColor.BLACK
+        self.out_black, self.out_white = 0, 0
+
     def copy(self):
         return AbaloneModel(edge_size=self.edge_size, field=self.copy_field(),
                             turns=self.turns, cur_color=self.cur_color,
-                            out_black=self.out_black, out_white=self.out_white,)
+                            out_black=self.out_black, out_white=self.out_white)
 
     def copy_field(self) -> np.ndarray:
         return np.copy(self.field)
