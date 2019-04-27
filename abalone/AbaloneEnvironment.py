@@ -18,7 +18,7 @@ class AbaloneEnvironment(Environment):
         self.reward_module = reward_module
 
     def action(self, action: int) -> (np.ndarray, float, bool):
-        y, x, description = self._decode_action(action)
+        y, x, description = self.decode_action(action)
         success = self.abalone_model.try_push_stone(y, x, description)
         out_black, out_white, winner = self.abalone_model.next_turn()
         field = self.abalone_model.copy_field()
@@ -40,7 +40,7 @@ class AbaloneEnvironment(Environment):
     def get_state(self) -> np.ndarray:
         return self.abalone_model.copy_field()
 
-    def _decode_action(self, action: int) -> (int, int, HexDescription):
-        l6norm = action // 6
-        y, x = self.abalone_model.get_2d_pos(l6norm)
-        return y, x, HexDescription(l6norm)
+    def decode_action(self, action: int) -> (int, int, HexDescription):
+        l6 = action // 6
+        y, x = self.abalone_model.get_2d_pos(l6)
+        return y, x, HexDescription(action - (self.abalone_model.edge_size * 6 * l6))

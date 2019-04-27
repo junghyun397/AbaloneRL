@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, Tuple
 
 import numpy as np
 
@@ -49,10 +49,10 @@ class AbaloneModel:
 
     def try_push_stone(self, x: int, y: int, description: HexDescription) -> bool:
         line = self.can_push_stone(x, y, description)
-        if line is not None:
-            self.push_stone(x, y, description, line)
-            return True
-        return False
+        if line is None:
+            return False
+        self.push_stone(x, y, description, line)
+        return True
 
     def can_push_stone(self, x: int, y: int, description: HexDescription) -> Optional[list]:
         line = self.get_line(x, y, description)
@@ -75,9 +75,9 @@ class AbaloneModel:
         if line is None:
             line = self.get_line(x, y, description)
 
-        if line[len(line) - 1] == StoneColor.BLACK:
+        if line[len(line) - 1] == StoneColor.BLACK.value:
             self.out_black += 1
-        elif line[len(line) - 1] == StoneColor.WHITE:
+        elif line[len(line) - 1] == StoneColor.WHITE.value:
             self.out_white += 1
 
         line = [0] + line
@@ -117,8 +117,7 @@ class AbaloneModel:
             else:
                 return [self.field[self.get_1d_pos(yp, x)] for yp in reversed(range(x - self.edge_size + 1, x))]
         elif description == HexDescription.ZP:
-            return [self.field[self.get_1d_pos(yp, xp)] for yp, xp in
-                    zip(range(y, self.edge_size * 2 - 2), range(x, self.edge_size * 2 - 2))]
+            return [self.field[self.get_1d_pos(yp, xp)] for yp, xp in zip(range(y, self.edge_size * 2 - 2), range(x, self.edge_size * 2 - 2))]
         elif description == HexDescription.ZM:
             return [self.field[self.get_1d_pos(yp, xp)] for yp, xp in zip(reversed(range(0, y)), reversed(range(0, x)))]
 
@@ -143,7 +142,7 @@ class AbaloneModel:
                 self.field[self.get_1d_pos(y - index, x - index)] = line[index]
 
     def set_field_stone(self, y: int, x: int, color: StoneColor) -> None:
-        self.field[self.get_1d_pos(y, x)] = color
+        self.field[self.get_1d_pos(y, x)] = color.value
 
     def get_field_stone(self, y: int, x: int) -> int:
         return self.field[self.get_1d_pos(y, x)]
@@ -183,6 +182,9 @@ class AbaloneModel:
 
     def copy_field(self) -> np.ndarray:
         return np.copy(self.field)
+
+    def to_vector(self) -> Tuple[np.ndarray, int, StoneColor, int, int]:
+        return self.copy_field(), self.turns, self.cur_color, self.out_black, self.out_white
 
     # Private
 
