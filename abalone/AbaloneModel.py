@@ -58,18 +58,18 @@ class AbaloneModel:
         line = self.get_line(x, y, description)
         my_count, opp_count = 0, 0
         for s in line:
-            if s == self.cur_color:
-                if opp_count > 0:
-                    return None
+            if s == self.cur_color.value:
                 my_count += 1
-            elif s != StoneColor.NONE:
-                opp_count += 1
-                if not opp_count < my_count:
+            elif s != 0:
+                if opp_count > my_count:
                     return None
+                opp_count += 1
+            else:
+                if my_count > opp_count:
+                    return line
 
-            if my_count > 3 or opp_count > 2:
+            if my_count > 3 or opp_count > 3:
                 return None
-        return line
 
     def push_stone(self, x: int, y: int, description: HexDescription, line: list = None) -> None:
         if line is None:
