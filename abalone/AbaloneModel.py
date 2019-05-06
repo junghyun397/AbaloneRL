@@ -18,7 +18,8 @@ class AbaloneModel:
                  turns: int = 0,
                  cur_color: StoneColor = StoneColor.BLACK,
                  out_black: int = 0,
-                 out_white: int = 0):
+                 out_white: int = 0,
+                 enable_log: bool = False):
         self.edge_size = edge_size
         if field is None:
             field = new_field(edge_size)
@@ -33,6 +34,10 @@ class AbaloneModel:
         self._cur_out_black = 0
         self._cur_out_white = 0
 
+        self._log = None
+        if enable_log:
+            self._log = []
+
     # Game Control
 
     def next_turn(self) -> (int, int, Optional[StoneColor]):
@@ -43,19 +48,19 @@ class AbaloneModel:
         self._cur_out_black, self._cur_out_white = 0, 0
         self.turns += 1
         self._flip_color()
-        return temp_out_black, temp_out_white, self.get_win()
+        return temp_out_black, temp_out_white, self.is_win()
 
     # Logic Filed Control
 
-    def try_push_stone(self, x: int, y: int, description: HexDescription) -> bool:
-        line = self.can_push_stone(x, y, description)
+    def try_push_stone(self, y: int, x: int, description: HexDescription) -> bool:
+        line = self.can_push_stone(y, x, description)
         if line is None:
             return False
-        self.push_stone(x, y, description, line)
+        self.push_stone(y, x, description, line)
         return True
 
-    def can_push_stone(self, x: int, y: int, description: HexDescription) -> Optional[list]:
-        line = self.get_line(x, y, description)
+    def can_push_stone(self, y: int, x: int, description: HexDescription) -> Optional[list]:
+        line = self.get_line(y, x, description)
         my_count, opp_count = 0, 0
         for s in line:
             if s == self.cur_color.value:
@@ -71,9 +76,9 @@ class AbaloneModel:
             if my_count > 3 or opp_count > 3:
                 return None
 
-    def push_stone(self, x: int, y: int, description: HexDescription, line: list = None) -> None:
+    def push_stone(self, y: int, x: int, description: HexDescription, line: list = None) -> None:
         if line is None:
-            line = self.get_line(x, y, description)
+            line = self.get_line(y, x, description)
 
         if line[len(line) - 1] == StoneColor.BLACK.value:
             self.out_black += 1
@@ -82,11 +87,14 @@ class AbaloneModel:
 
         line = [0] + line
         line.pop()
-        self.set_line(x, y, description, line)
+        self.set_line(y, x, description, line)
+
+        if self._log is not None:
+            self._log.append((y, x, description))
 
     # Game Observe
 
-    def get_win(self) -> Optional[StoneColor]:
+    def is_win(self) -> Optional[StoneColor]:
         if self.out_white > 5:
             return StoneColor.BLACK
         elif self.out_black > 5:
@@ -95,7 +103,7 @@ class AbaloneModel:
 
     # Bin Field Control
 
-    def get_line(self, x: int, y: int, description: HexDescription) -> list:
+    def get_line(self, y: int, x: int, description: HexDescription) -> list:
         if description == HexDescription.XP:
             if y < self.edge_size:
                 return [self.field[self.get_1d_pos(y, xp)] for xp in range(x, self.edge_size + y - 1)]
@@ -121,7 +129,7 @@ class AbaloneModel:
         elif description == HexDescription.ZM:
             return [self.field[self.get_1d_pos(yp, xp)] for yp, xp in zip(reversed(range(0, y)), reversed(range(0, x)))]
 
-    def set_line(self, x: int, y: int, description: HexDescription, line: list) -> None:
+    def set_line(self, y: int, x: int, description: HexDescription, line: list) -> None:
         if description == HexDescription.XP:
             for index in range(len(line)):
                 self.field[self.get_1d_pos(y, x + index)] = line[index]
@@ -158,7 +166,7 @@ class AbaloneModel:
     def get_2d_pos(self, index: int) -> (int, int):
         pass
 
-    def get_end_point(self, x: int, y: int, description: HexDescription) -> int:
+    def get_end_point(self, y: int, x: int, description: HexDescription) -> int:
         pass
 
     def check_valid_pos(self, y: int, x: int) -> bool:
@@ -183,8 +191,9 @@ class AbaloneModel:
     def copy_field(self) -> np.ndarray:
         return np.copy(self.field)
 
-    def to_vector(self) -> Tuple[np.ndarray, int, StoneColor, int, int]:
-        return self.copy_field(), self.turns, self.cur_color, self.out_black, self.out_white
+    # noinspection PyTypeChecker
+    def to_vector(self) -> Tuple[np.ndarray, int, int, int, int]:
+        return self.copy_field(), self.turns, self.cur_color.value, self.out_black, self.out_white
 
     # Private
 

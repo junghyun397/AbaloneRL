@@ -15,6 +15,8 @@ class GraphicModule:
         return cls._instance
 
     def __init__(self):
+        self.update_frequency = 60
+
         self.abalone_model = None
         self.alive_ui = False
         self.active_playable = False
@@ -37,7 +39,7 @@ class GraphicModule:
     # Main
 
     def _main_loop(self) -> None:
-        while True:
+        while self.alive_ui:
             if self.active_playable:
                 pass
 

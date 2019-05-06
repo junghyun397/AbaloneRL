@@ -43,4 +43,4 @@ class AbaloneEnvironment(Environment):
     def decode_action(self, action: int) -> (int, int, HexDescription):
         l6 = action // 6
         y, x = self.abalone_model.get_2d_pos(l6)
-        return y, x, HexDescription(action - (self.abalone_model.edge_size * 6 * l6))
+        return y, x, HexDescription(action - (6 * l6))
