@@ -21,7 +21,6 @@ class AbaloneEnvironment(Environment):
         y, x, description = self.decode_action(action)
         success = self.abalone_model.try_push_stone(y, x, description)
         out_black, out_white, winner = self.abalone_model.next_turn()
-        field = self.abalone_model.copy_field()
 
         end, win = False, False
         if winner is not None:
@@ -35,10 +34,10 @@ class AbaloneEnvironment(Environment):
         else:
             out = out_white
 
-        return field, self.reward_module.get_reward(success, self.abalone_model.turns, out, end, win), end
+        return self.abalone_model.to_vector(), self.reward_module.get_reward(success, self.abalone_model.turns, out, end, win), end
 
     def get_state(self) -> np.ndarray:
-        return self.abalone_model.copy_field()
+        return self.abalone_model.to_vector()
 
     def decode_action(self, action: int) -> (int, int, HexDescription):
         l6 = action // 6

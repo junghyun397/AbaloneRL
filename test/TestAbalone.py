@@ -1,5 +1,7 @@
 import unittest
 
+import numpy as np
+
 from abalone.AbaloneModel import AbaloneModel
 
 model3 = AbaloneModel(3)
@@ -45,3 +47,6 @@ class TestAbalone(unittest.TestCase):
         self.assertFalse(model5.check_valid_pos(5, 0))
         self.assertFalse(model5.check_valid_pos(6, 1))
         self.assertFalse(model5.check_valid_pos(8, 3))
+
+    def test_to_vector(self):
+        self.assertTrue(np.equal(model3.to_vector(), np.array([0] * (model3.field.size + 3))))

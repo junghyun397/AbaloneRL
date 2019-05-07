@@ -7,7 +7,7 @@ from abalone.StoneColor import StoneColor
 
 
 def new_field(size: int) -> np.ndarray:
-    return np.zeros((3 * pow(size, 2) - 3 * size + 1,))
+    return np.zeros((3 * pow(size, 2) - 3 * size + 1,), dtype=np.int8)
 
 
 class AbaloneModel:
@@ -183,6 +183,9 @@ class AbaloneModel:
         self.cur_color = StoneColor.BLACK
         self.out_black, self.out_white = 0, 0
 
+        if self._log is not None:
+            self._log = []
+
     def copy(self):
         return AbaloneModel(edge_size=self.edge_size, field=self.copy_field(),
                             turns=self.turns, cur_color=self.cur_color,
@@ -191,9 +194,8 @@ class AbaloneModel:
     def copy_field(self) -> np.ndarray:
         return np.copy(self.field)
 
-    # noinspection PyTypeChecker
-    def to_vector(self) -> Tuple[np.ndarray, int, int, int, int]:
-        return self.copy_field(), self.turns, self.cur_color.value, self.out_black, self.out_white
+    def to_vector(self) -> np.ndarray:
+        return np.append(self.copy_field(), np.array([self.out_black, self.out_white, self.turns], dtype=np.int8))
 
     # Private
 
