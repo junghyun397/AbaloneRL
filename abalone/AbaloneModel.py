@@ -1,4 +1,4 @@
-from typing import Optional, Tuple
+from typing import Optional
 
 import numpy as np
 
@@ -130,23 +130,18 @@ class AbaloneModel:
             return [self.field[self.get_1d_pos(yp, xp)] for yp, xp in zip(reversed(range(0, y)), reversed(range(0, x)))]
 
     def set_line(self, y: int, x: int, description: HexDescription, line: list) -> None:
-        if description == HexDescription.XP:
-            for index in range(len(line)):
+        for index in range(len(line)):
+            if description == HexDescription.XP:
                 self.field[self.get_1d_pos(y, x + index)] = line[index]
-        elif description == HexDescription.XM:
-            for index in range(len(line)):
+            elif description == HexDescription.XM:
                 self.field[self.get_1d_pos(y, x - index)] = line[index]
-        elif description == HexDescription.YP:
-            for index in range(len(line)):
+            elif description == HexDescription.YP:
                 self.field[self.get_1d_pos(y + index, x)] = line[index]
-        elif description == HexDescription.YM:
-            for index in range(len(line)):
+            elif description == HexDescription.YM:
                 self.field[self.get_1d_pos(y - index, x)] = line[index]
-        elif description == HexDescription.ZP:
-            for index in range(len(line)):
+            elif description == HexDescription.ZP:
                 self.field[self.get_1d_pos(y + index, x + index)] = line[index]
-        elif description == HexDescription.ZM:
-            for index in range(len(line)):
+            elif description == HexDescription.ZM:
                 self.field[self.get_1d_pos(y - index, x - index)] = line[index]
 
     def set_field_stone(self, y: int, x: int, color: StoneColor) -> None:
@@ -164,10 +159,8 @@ class AbaloneModel:
             return int((y * (-y + 6 * self.edge_size - 5) + -2 * self.edge_size * (self.edge_size - 2) - 2) / 2) + x
 
     def get_2d_pos(self, index: int) -> (int, int):
-        pass
-
-    def get_end_point(self, y: int, x: int, description: HexDescription) -> int:
-        pass
+        if index < self.edge_size * 2:
+            pass
 
     def check_valid_pos(self, y: int, x: int) -> bool:
         if y < self.edge_size:
