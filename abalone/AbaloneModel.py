@@ -18,8 +18,7 @@ class AbaloneModel:
                  turns: int = 0,
                  cur_color: StoneColor = StoneColor.BLACK,
                  out_black: int = 0,
-                 out_white: int = 0,
-                 enable_log: bool = False):
+                 out_white: int = 0):
         self.edge_size = edge_size
         if field is None:
             field = new_field(edge_size)
@@ -33,10 +32,6 @@ class AbaloneModel:
 
         self._cur_out_black = 0
         self._cur_out_white = 0
-
-        self._log = None
-        if enable_log:
-            self._log = []
 
     # Game Control
 
@@ -61,6 +56,9 @@ class AbaloneModel:
 
     def can_push_stone(self, y: int, x: int, description: HexDescription) -> Optional[list]:
         line = self.get_line(y, x, description)
+        if len(line) < 2:
+            return None
+
         my_count, opp_count = 0, 0
         for s in line:
             if s == self.cur_color.value:
@@ -85,12 +83,8 @@ class AbaloneModel:
         elif line[len(line) - 1] == StoneColor.WHITE.value:
             self.out_white += 1
 
-        line = [0] + line
-        line.pop()
+        line = [0] + line.pop()
         self.set_line(y, x, description, line)
-
-        if self._log is not None:
-            self._log.append((y, x, description))
 
     # Game Observe
 
@@ -130,18 +124,23 @@ class AbaloneModel:
             return [self.field[self.get_1d_pos(yp, xp)] for yp, xp in zip(reversed(range(0, y)), reversed(range(0, x)))]
 
     def set_line(self, y: int, x: int, description: HexDescription, line: list) -> None:
-        for index in range(len(line)):
-            if description == HexDescription.XP:
+        if description == HexDescription.XP:
+            for index in range(len(line)):
                 self.field[self.get_1d_pos(y, x + index)] = line[index]
-            elif description == HexDescription.XM:
+        elif description == HexDescription.XM:
+            for index in range(len(line)):
                 self.field[self.get_1d_pos(y, x - index)] = line[index]
-            elif description == HexDescription.YP:
+        elif description == HexDescription.YP:
+            for index in range(len(line)):
                 self.field[self.get_1d_pos(y + index, x)] = line[index]
-            elif description == HexDescription.YM:
+        elif description == HexDescription.YM:
+            for index in range(len(line)):
                 self.field[self.get_1d_pos(y - index, x)] = line[index]
-            elif description == HexDescription.ZP:
+        elif description == HexDescription.ZP:
+            for index in range(len(line)):
                 self.field[self.get_1d_pos(y + index, x + index)] = line[index]
-            elif description == HexDescription.ZM:
+        elif description == HexDescription.ZM:
+            for index in range(len(line)):
                 self.field[self.get_1d_pos(y - index, x - index)] = line[index]
 
     def set_field_stone(self, y: int, x: int, color: StoneColor) -> None:
@@ -159,7 +158,9 @@ class AbaloneModel:
             return int((y * (-y + 6 * self.edge_size - 5) + -2 * self.edge_size * (self.edge_size - 2) - 2) / 2) + x
 
     def get_2d_pos(self, index: int) -> (int, int):
-        if index < self.edge_size * 2:
+        if index > self.field.size // 2:
+            pass
+        else:
             pass
 
     def check_valid_pos(self, y: int, x: int) -> bool:
@@ -175,9 +176,6 @@ class AbaloneModel:
         self.turns = 0
         self.cur_color = StoneColor.BLACK
         self.out_black, self.out_white = 0, 0
-
-        if self._log is not None:
-            self._log = []
 
     def copy(self):
         return AbaloneModel(edge_size=self.edge_size, field=self.copy_field(),

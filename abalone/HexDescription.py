@@ -2,6 +2,8 @@ from enum import Enum
 
 
 class HexDescription(Enum):
+    NONE = 0
+
     X = 10
     XP = 1
     XM = 2
