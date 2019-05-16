@@ -4,6 +4,7 @@ from abalone.AbaloneModel import AbaloneModel
 from abalone.FieldTemplate import FieldTemplate
 from abalone.HexDescription import HexDescription
 from abalone.StoneColor import StoneColor
+
 from agent.Environment import Environment
 from agent.reward.RewardModule import RewardModule
 from agent.reward.SuccessMoveReward import SuccessMoveReward
@@ -12,7 +13,8 @@ from agent.reward.SuccessMoveReward import SuccessMoveReward
 class AbaloneEnvironment(Environment):
 
     def __init__(self,
-                 abalone_model: AbaloneModel = AbaloneModel(edge_size=5, field=FieldTemplate.EDGE_5_BELGIAN_DAISY),
+                 abalone_model: AbaloneModel = AbaloneModel(edge_size=5,
+                                                            field=FieldTemplate.Edge5.EDGE_5_BELGIAN_DAISY),
                  reward_module: RewardModule = SuccessMoveReward()):
         self.abalone_model = abalone_model
         self.reward_module = reward_module
@@ -34,7 +36,8 @@ class AbaloneEnvironment(Environment):
         else:
             out = out_white
 
-        return self.abalone_model.to_vector(), self.reward_module.get_reward(success, self.abalone_model.turns, out, end, win), end
+        return self.abalone_model.to_vector(), self.reward_module.get_reward(success, self.abalone_model.turns, out,
+                                                                             end, win), end
 
     def get_state(self) -> np.ndarray:
         return self.abalone_model.to_vector()

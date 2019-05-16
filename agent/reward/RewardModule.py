@@ -10,3 +10,7 @@ class RewardModule(metaclass=ABCMeta):
     @abstractmethod
     def get_reward(self, success: bool, turns: int, out: int, end: bool, win: bool) -> float:
         pass
+
+    @abstractmethod
+    def half(self, ratio: int):
+        pass

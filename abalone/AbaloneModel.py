@@ -1,13 +1,14 @@
-from typing import Optional
+from typing import Optional, Callable
 
 import numpy as np
+from numpy.core.multiarray import ndarray
 
 from abalone.HexDescription import HexDescription
 from abalone.StoneColor import StoneColor
 
 
 def new_field(size: int) -> np.ndarray:
-    return np.zeros((3 * pow(size, 2) - 3 * size + 1,), dtype=np.int8)
+    return np.zeros((3 * size ** 2 - 3 * size + 1,), dtype=np.int8)
 
 
 class AbaloneModel:
@@ -39,8 +40,8 @@ class AbaloneModel:
         self.out_black += self._cur_out_black
         self.out_white += self._cur_out_white
         temp_out_black, temp_out_white = self._cur_out_black, self._cur_out_white
-
         self._cur_out_black, self._cur_out_white = 0, 0
+
         self.turns += 1
         self._flip_color()
         return temp_out_black, temp_out_white, self.is_win()
@@ -159,9 +160,10 @@ class AbaloneModel:
 
     def get_2d_pos(self, index: int) -> (int, int):
         if index > self.field.size // 2:
-            pass
+            y, x = 0, 0
         else:
-            pass
+            y, x = 0, 0
+        return y, x
 
     def check_valid_pos(self, y: int, x: int) -> bool:
         if y < self.edge_size:
