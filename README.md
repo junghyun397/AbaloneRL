@@ -1,2 +1,2 @@
 # AbaloneRL
-Abalone AI implemented by alpha-beta pruning with Reinforce learning
+Abalone ReinforcementLearning Environment and AI implemented by alpha-beta pruning with Reinforce learning
