@@ -36,8 +36,7 @@ class AbaloneEnvironment(Environment):
         else:
             out = out_white
 
-        return self.abalone_model.to_vector(), self.reward_module.get_reward(success, self.abalone_model.turns, out,
-                                                                             end, win), end
+        return self.abalone_model.to_vector(), self.reward_module.get_reward(success, self.abalone_model.turns, out, end, win), end
 
     def get_state(self) -> np.ndarray:
         return self.abalone_model.to_vector()
