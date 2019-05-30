@@ -13,5 +13,5 @@ class SuccessMoveReward(RewardModule):
             rwd = self.success_reward
         return rwd
 
-    def half(self, ratio: int = 0.5):
+    def dim(self, ratio: int = 0.5):
         self.success_reward = self.success_reward * ratio
