@@ -24,8 +24,10 @@ class TestAbalone(unittest.TestCase):
         self.assertEqual(model5.get_1d_pos(7, 5), 52)
         self.assertEqual(model5.get_1d_pos(8, 4), 56)
 
-    def test_2d_2_1d_pos(self):
-        pass
+    def test_1d_2_2d_pos(self):
+        self.assertEqual(model5.get_2d_pos(model5.get_1d_pos(5, 5)), (5, 5))
+        self.assertEqual(model5.get_2d_pos(model5.get_1d_pos(8, 2)), (8, 2))
+        self.assertEqual(model5.get_2d_pos(model5.get_1d_pos(0, 0)), (0, 0))
 
     def test_valid_pos(self):
         # Model 3

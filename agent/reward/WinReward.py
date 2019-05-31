@@ -13,5 +13,5 @@ class WinReward(RewardModule):
         else:
             return 0
 
-    def half(self, ratio: float = 0.5):
+    def dim(self, ratio: float = 0.5):
         self.win_reward = self.win_reward * ratio

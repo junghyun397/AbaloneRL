@@ -12,5 +12,5 @@ class RewardModule(metaclass=ABCMeta):
         pass
 
     @abstractmethod
-    def half(self, ratio: int):
+    def dim(self, ratio: int):
         pass
