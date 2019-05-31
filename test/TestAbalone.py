@@ -50,3 +50,4 @@ class TestAbalone(unittest.TestCase):
 
     def test_to_vector(self):
         self.assertTrue(np.equal(model3.to_vector(), np.array([0] * (model3.field.size + 3))))
+        self.assertTrue(np.equal(model5.to_vector(), np.array([0] * (model5.field.size + 3))))

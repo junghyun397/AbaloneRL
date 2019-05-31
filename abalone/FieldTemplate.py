@@ -8,6 +8,8 @@ stone_blank = "*"
 stone_black = "B"
 stone_white = "W"
 
+fixed_width_char = []
+
 
 class FieldTemplate:
 

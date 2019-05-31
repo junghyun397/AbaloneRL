@@ -12,10 +12,10 @@ from agent.reward.SuccessMoveReward import SuccessMoveReward
 
 class AbaloneEnvironment(Environment):
 
-    def __init__(self,
-                 abalone_model: AbaloneModel = AbaloneModel(edge_size=5,
-                                                            field=FieldTemplate.Edge5.EDGE_5_BELGIAN_DAISY),
+    def __init__(self, abalone_model: AbaloneModel = AbaloneModel(edge_size=5,
+                                                                  field=FieldTemplate.Edge5.EDGE_5_BELGIAN_DAISY),
                  reward_module: RewardModule = SuccessMoveReward()):
+        super().__init__(abalone_model.field.size)
         self.abalone_model = abalone_model
         self.reward_module = reward_module
 
@@ -36,8 +36,7 @@ class AbaloneEnvironment(Environment):
         else:
             out = out_white
 
-        return self.abalone_model.to_vector(), self.reward_module.get_reward(success, self.abalone_model.turns, out,
-                                                                             end, win), end
+        return self.abalone_model.to_vector(), self.reward_module.get_reward(success, self.abalone_model.turns, out, end, win), end
 
     def get_state(self) -> np.ndarray:
         return self.abalone_model.to_vector()

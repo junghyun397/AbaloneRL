@@ -1,7 +1,6 @@
-from typing import Optional, Callable
+from typing import Optional
 
 import numpy as np
-from numpy.core.multiarray import ndarray
 
 from abalone.HexDescription import HexDescription
 from abalone.StoneColor import StoneColor
@@ -44,7 +43,7 @@ class AbaloneModel:
 
         self.turns += 1
         self._flip_color()
-        return temp_out_black, temp_out_white, self.is_win()
+        return temp_out_black, temp_out_white, self.get_winner()
 
     # Logic Filed Control
 
@@ -89,7 +88,7 @@ class AbaloneModel:
 
     # Game Observe
 
-    def is_win(self) -> Optional[StoneColor]:
+    def get_winner(self) -> Optional[StoneColor]:
         if self.out_white > 5:
             return StoneColor.BLACK
         elif self.out_black > 5:
@@ -188,7 +187,7 @@ class AbaloneModel:
         return np.copy(self.field)
 
     def to_vector(self) -> np.ndarray:
-        return np.append(self.copy_field(), np.array([self.out_black, self.out_white, self.turns], dtype=np.int8))
+        return np.append(self.copy_field(), [self.out_black, self.out_white, self.turns], dtype=np.int8)
 
     # Private
 
