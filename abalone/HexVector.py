@@ -1,13 +1,22 @@
 from abalone.HexDescription import HexDescription
 
 
-class HexVector:
+m1_size = 8
+m2_size = 8192
 
-    indexed_vector = None
+indexed_vector = dict()
+
+
+class HexVector:
 
     @staticmethod
     def get_indexed_vector(y: int, x: int, description: HexDescription):
-        pass
+        index_n_code = y * m2_size + x * m1_size + description.value
+
+        if indexed_vector[index_n_code] is None:
+            indexed_vector[index_n_code] = HexVector(y, x, description)
+
+        return indexed_vector[index_n_code]
 
     def __init__(self, y: int, x: int, description: HexDescription):
         self.y = y
