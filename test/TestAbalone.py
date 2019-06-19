@@ -10,7 +10,7 @@ model5 = AbaloneModel(5)
 
 class TestAbalone(unittest.TestCase):
 
-    def test_1d_2_1d_pos(self):
+    def test_2d_2_1d_pos(self):
         # Model 3
         self.assertEqual(model3.get_1d_pos(0, 0), 0)
         self.assertEqual(model3.get_1d_pos(1, 1), 4)

@@ -1,4 +1,5 @@
-from typing import Optional
+import math
+from typing import Optional, Callable
 
 import numpy as np
 
@@ -6,8 +7,29 @@ from abalone.HexDescription import HexDescription
 from abalone.StoneColor import StoneColor
 
 
+def get_field_size(edge_size: int) -> int:
+    return 3 * edge_size ** 2 - 3 * edge_size + 1
+
+
+def get_edge_size(field_size: int) -> int:
+    return int((3 + math.sqrt(12 * field_size - 3)) / 6)
+
+
+def get_pos_method(edge_size: int) -> (Callable[[int, int], int], Callable[[int], (int, int)]):
+    def get_1d_pos(y: int, x: int) -> int:
+        if y < edge_size:
+            return int(y * (-y + 2 * edge_size + 1) / 2) + x
+        else:
+            return int((y * (-y + 6 * edge_size - 5) + -2 * edge_size * (edge_size - 2) - 2) / 2) + x
+
+    def get_2d_pos(index: int) -> (int, int):
+        return 0, 0
+
+    return get_1d_pos, get_2d_pos
+
+
 def new_field(size: int) -> np.ndarray:
-    return np.zeros((3 * size ** 2 - 3 * size + 1,), dtype=np.int8)
+    return np.zeros((get_field_size(size),), dtype=np.int8)
 
 
 class AbaloneModel:
@@ -32,6 +54,8 @@ class AbaloneModel:
 
         self._cur_out_black = 0
         self._cur_out_white = 0
+
+        self.get_1d_pos, self.get_2d_pos = get_pos_method(edge_size)
 
     # Game Control
 
@@ -119,7 +143,8 @@ class AbaloneModel:
             else:
                 return [self.field[self.get_1d_pos(yp, x)] for yp in reversed(range(x - self.edge_size + 1, x))]
         elif description == HexDescription.ZP:
-            return [self.field[self.get_1d_pos(yp, xp)] for yp, xp in zip(range(y, self.edge_size * 2 - 2), range(x, self.edge_size * 2 - 2))]
+            return [self.field[self.get_1d_pos(yp, xp)] for yp, xp in
+                    zip(range(y, self.edge_size * 2 - 2), range(x, self.edge_size * 2 - 2))]
         elif description == HexDescription.ZM:
             return [self.field[self.get_1d_pos(yp, xp)] for yp, xp in zip(reversed(range(0, y)), reversed(range(0, x)))]
 
@@ -152,17 +177,10 @@ class AbaloneModel:
     # Position Data
 
     def get_1d_pos(self, y: int, x: int) -> int:
-        if y < self.edge_size:
-            return int(y * (-y + 2 * self.edge_size + 1) / 2) + x
-        else:
-            return int((y * (-y + 6 * self.edge_size - 5) + -2 * self.edge_size * (self.edge_size - 2) - 2) / 2) + x
+        pass
 
     def get_2d_pos(self, index: int) -> (int, int):
-        if index > self.field.size // 2:
-            y, x = 0, 0
-        else:
-            y, x = 0, 0
-        return y, x
+        pass
 
     def check_valid_pos(self, y: int, x: int) -> bool:
         if y < self.edge_size:
