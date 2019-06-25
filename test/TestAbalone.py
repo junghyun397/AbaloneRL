@@ -4,8 +4,8 @@ import numpy as np
 
 from abalone.AbaloneModel import AbaloneModel
 
-model3 = AbaloneModel(3)
-model5 = AbaloneModel(5)
+model3 = AbaloneModel(edge_size=3)
+model5 = AbaloneModel(edge_size=5)
 
 
 class TestAbalone(unittest.TestCase):
@@ -23,11 +23,6 @@ class TestAbalone(unittest.TestCase):
         self.assertEqual(model5.get_1d_pos(7, 3), 50)
         self.assertEqual(model5.get_1d_pos(7, 5), 52)
         self.assertEqual(model5.get_1d_pos(8, 4), 56)
-
-    def test_1d_2_2d_pos(self):
-        self.assertEqual(model5.get_2d_pos(model5.get_1d_pos(5, 5)), (5, 5))
-        self.assertEqual(model5.get_2d_pos(model5.get_1d_pos(8, 2)), (8, 2))
-        self.assertEqual(model5.get_2d_pos(model5.get_1d_pos(0, 0)), (0, 0))
 
     def test_valid_pos(self):
         # Model 3
@@ -50,6 +45,26 @@ class TestAbalone(unittest.TestCase):
         self.assertFalse(model5.check_valid_pos(6, 1))
         self.assertFalse(model5.check_valid_pos(8, 3))
 
+    def test_1d_2_2d_pos(self):
+        # Model 3
+        self.assertEqual(model3.get_2d_pos(model3.get_1d_pos(0, 0)), (0, 0))
+        self.assertEqual(model3.get_2d_pos(model3.get_1d_pos(1, 1)), (1, 1))
+        self.assertEqual(model3.get_2d_pos(model3.get_1d_pos(3, 1)), (3, 1))
+
+        # Model 5
+        self.assertEqual(model5.get_2d_pos(model5.get_1d_pos(5, 5)), (5, 5))
+        self.assertEqual(model5.get_2d_pos(model5.get_1d_pos(8, 2)), (8, 2))
+        self.assertEqual(model5.get_2d_pos(model5.get_1d_pos(0, 0)), (0, 0))
+
     def test_to_vector(self):
-        self.assertTrue(np.equal(model3.to_vector(), np.array([0] * (model3.field.size + 3))))
-        self.assertTrue(np.equal(model5.to_vector(), np.array([0] * (model5.field.size + 3))))
+        self.assertTrue(np.equal(model3.to_vector(), np.array([0] * (model3.field.size + 4))))
+        self.assertTrue(np.equal(model5.to_vector(), np.array([0] * (model5.field.size + 4))))
+
+    def test_can_push_stone(self):
+        pass
+
+    def test_push_stone(self):
+        pass
+
+    def test_end_game(self):
+        pass

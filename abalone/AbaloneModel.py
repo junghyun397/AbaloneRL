@@ -1,5 +1,5 @@
 import math
-from typing import Optional, Callable
+from typing import Optional, Callable, Tuple
 
 import numpy as np
 
@@ -15,7 +15,7 @@ def get_edge_size(field_size: int) -> int:
     return int((3 + math.sqrt(12 * field_size - 3)) / 6)
 
 
-def get_pos_method(edge_size: int) -> (Callable[[int, int], int], Callable[[int], (int, int)]):
+def get_pos_method(edge_size: int) -> (Callable[[int, int], int], Callable[[int], Tuple[int, int]]):
     def get_1d_pos(y: int, x: int) -> int:
         if y < edge_size:
             return int(y * (-y + 2 * edge_size + 1) / 2) + x
@@ -32,15 +32,29 @@ def new_field(size: int) -> np.ndarray:
     return np.zeros((get_field_size(size),), dtype=np.int8)
 
 
+# Game Vector Index
+# 0 edge_size :: 1 turns :: 2 current color :: 3 out_black :: 4 out_white :: 5~ filed ~
+
+
 class AbaloneModel:
 
     def __init__(self,
+                 vector: np.ndarray = None,
                  edge_size: int = 5,
                  field: np.ndarray = None,
                  turns: int = 0,
                  cur_color: StoneColor = StoneColor.BLACK,
                  out_black: int = 0,
                  out_white: int = 0):
+
+        if vector is not None:
+            edge_size = vector[0]
+            turns = vector[1]
+            cur_color = vector[2]
+            out_black = vector[3]
+            out_white = vector[4]
+            field = vector[5::]
+
         self.edge_size = edge_size
         if field is None:
             field = new_field(edge_size)
@@ -205,7 +219,7 @@ class AbaloneModel:
         return np.copy(self.field)
 
     def to_vector(self) -> np.ndarray:
-        return np.append(self.copy_field(), [self.out_black, self.out_white, self.turns], dtype=np.int8)
+        return np.append([self.edge_size, self.turns, self.cur_color, self.out_black, self.out_white], self.copy_field(), dtype=np.int8)
 
     # Private
 
