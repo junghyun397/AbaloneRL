@@ -3,6 +3,7 @@ from typing import Optional, Callable, Tuple
 
 import numpy as np
 
+from abalone.AbaloneAgent import AbaloneAgent
 from abalone.HexDescription import HexDescription
 from abalone.StoneColor import StoneColor
 
@@ -23,7 +24,10 @@ def get_pos_method(edge_size: int) -> (Callable[[int, int], int], Callable[[int]
             return int((y * (-y + 6 * edge_size - 5) + -2 * edge_size * (edge_size - 2) - 2) / 2) + x
 
     def get_2d_pos(index: int) -> (int, int):
-        return 0, 0
+        if index < edge_size:
+            return 0, 0
+        else:
+            return 0, 0
 
     return get_1d_pos, get_2d_pos
 
@@ -36,7 +40,7 @@ def new_field(size: int) -> np.ndarray:
 # 0 edge_size :: 1 turns :: 2 current color :: 3 out_black :: 4 out_white :: 5~ filed ~
 
 
-class AbaloneModel:
+class AbaloneModel(AbaloneAgent):
 
     def __init__(self,
                  vector: np.ndarray = None,
@@ -47,10 +51,12 @@ class AbaloneModel:
                  out_black: int = 0,
                  out_white: int = 0):
 
+        super().__init__(edge_size)
+
         if vector is not None:
             edge_size = vector[0]
             turns = vector[1]
-            cur_color = vector[2]
+            cur_color = StoneColor(vector[2])
             out_black = vector[3]
             out_white = vector[4]
             field = vector[5::]
@@ -66,18 +72,13 @@ class AbaloneModel:
         self.out_black = out_black
         self.out_white = out_white
 
-        self._cur_out_black = 0
-        self._cur_out_white = 0
-
-        self.get_1d_pos, self.get_2d_pos = get_pos_method(edge_size)
-
     # Game Control
 
     def next_turn(self) -> (int, int, Optional[StoneColor]):
-        self.out_black += self._cur_out_black
-        self.out_white += self._cur_out_white
-        temp_out_black, temp_out_white = self._cur_out_black, self._cur_out_white
-        self._cur_out_black, self._cur_out_white = 0, 0
+        self.out_black += self.cur_out_black
+        self.out_white += self.cur_out_white
+        temp_out_black, temp_out_white = self.cur_out_black, self.cur_out_white
+        self.cur_out_black, self.cur_out_white = 0, 0
 
         self.turns += 1
         self._flip_color()
@@ -190,12 +191,6 @@ class AbaloneModel:
 
     # Position Data
 
-    def get_1d_pos(self, y: int, x: int) -> int:
-        pass
-
-    def get_2d_pos(self, index: int) -> (int, int):
-        pass
-
     def check_valid_pos(self, y: int, x: int) -> bool:
         if y < self.edge_size:
             return y < self.edge_size * 2 and self.edge_size + y > x > -1
@@ -219,7 +214,7 @@ class AbaloneModel:
         return np.copy(self.field)
 
     def to_vector(self) -> np.ndarray:
-        return np.append([self.edge_size, self.turns, self.cur_color, self.out_black, self.out_white], self.copy_field(), dtype=np.int8)
+        return np.append([self.edge_size, self.turns, self.cur_color.value, self.out_black, self.out_white], self.copy_field())
 
     # Private
 

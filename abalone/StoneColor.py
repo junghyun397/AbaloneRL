@@ -2,6 +2,6 @@ from enum import Enum
 
 
 class StoneColor(Enum):
-    NONE = 0
-    BLACK = 1
-    WHITE = 2
+    BLACK = 0
+    WHITE = 1
+    NONE = 2
