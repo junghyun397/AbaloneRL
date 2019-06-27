@@ -1,4 +1,4 @@
-from abalone.AbaloneModel import AbaloneModel
+from abalone import AbaloneAgent
 
 
 class GraphicModule:
@@ -23,7 +23,7 @@ class GraphicModule:
 
     # Basic Setting
 
-    def set_model(self, abalone_model: AbaloneModel) -> None:
+    def set_model(self, abalone_model: AbaloneAgent) -> None:
         self.abalone_model = abalone_model
         self._update_state()
 

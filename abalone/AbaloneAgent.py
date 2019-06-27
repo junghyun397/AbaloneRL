@@ -7,31 +7,69 @@ from abalone.StoneColor import StoneColor
 from abalone import AbaloneModel
 
 
-class AbaloneAgent(AbaloneModel):
+# Game Vector Index
+# 0 edge_size :: 1 turns :: 2 current color :: 3 out_black :: 4 out_white :: 5~ filed ~
+
+
+class AbaloneAgent:
 
     def __init__(self,
-                 edge_size: int,
+                 edge_size: int = 5,
                  vector: np.ndarray = None):
+        if vector is None:
+            vector = AbaloneModel.new_vector(edge_size)
+
         self.edge_size = edge_size
         self.game_vector = vector
+
+        self.field_size = AbaloneModel.get_field_size(edge_size)
+
         self.get_1d_pos, self.get_2d_pos = AbaloneModel.get_pos_method(edge_size)
 
-        self.cur_out_black = 0
-        self.cur_out_white = 0
+        self.turn_out_black = 0
+        self.turn_out_white = 0
+
+    # Bin Data
 
     def set_game_vector(self, vector: np.ndarray) -> None:
-        self.cur_out_black, self.cur_out_white = 0, 0
+        self.turn_out_black, self.turn_out_white = 0, 0
         self.game_vector = vector
+
+    def reset(self):
+        self.game_vector = np.zeros((5 + AbaloneModel.get_field_size(self.edge_size),), dtype=np.int8)
+
+    def copy(self):
+        return AbaloneAgent(self.edge_size, np.copy(self.game_vector))
+
+    def copy_vector(self) -> np.ndarray:
+        return np.copy(self.game_vector)
+
+    # Game Data
+
+    def get_filed(self) -> np.ndarray:
+        return self.game_vector[5::]
+
+    def get_turns(self) -> int:
+        return self.game_vector[1]
+
+    def get_current_color(self) -> int:
+        return self.game_vector[2]
+
+    def get_out_black(self) -> int:
+        return self.game_vector[3]
+
+    def get_out_white(self) -> int:
+        return self.game_vector[4]
 
     # Game Control
 
     def next_turn(self) -> (int, int, Optional[StoneColor]):
-        self.game_vector[3] += self.cur_out_black
-        self.game_vector[4] += self.cur_out_white
-        temp_out_black, temp_out_white = self.cur_out_black, self.cur_out_white
-        self.cur_out_black, self.cur_out_white = 0, 0
+        self.game_vector[3] += self.turn_out_black
+        self.game_vector[4] += self.turn_out_white
+        temp_out_black, temp_out_white = self.turn_out_black, self.turn_out_white
+        self.turn_out_black, self.turn_out_white = 0, 0
 
-        self.turns += 1
+        self.game_vector[1] += 1
         self._flip_color()
         return temp_out_black, temp_out_white, self.get_winner()
 
@@ -157,7 +195,7 @@ class AbaloneAgent(AbaloneModel):
     # Private
 
     def _flip_color(self) -> None:
-        if self.game_vector[2] == StoneColor.BLACK:
-            self.game_vector[2] = StoneColor.WHITE
+        if self.game_vector[2] == StoneColor.BLACK.value:
+            self.game_vector[2] = StoneColor.WHITE.value
         else:
-            self.game_vector[2] = StoneColor.BLACK
+            self.game_vector[2] = StoneColor.BLACK.value

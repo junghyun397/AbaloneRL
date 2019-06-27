@@ -3,9 +3,10 @@ import unittest
 import numpy as np
 
 from abalone import AbaloneModel
+from abalone.AbaloneAgent import AbaloneAgent
 
-model3 = AbaloneModel.AbaloneModel(edge_size=3)
-model5 = AbaloneModel.AbaloneModel(edge_size=5)
+model3 = AbaloneAgent(edge_size=3)
+model5 = AbaloneAgent(edge_size=5)
 
 
 class TestAbalone(unittest.TestCase):
@@ -57,12 +58,12 @@ class TestAbalone(unittest.TestCase):
         self.assertEqual(model5.get_2d_pos(model5.get_1d_pos(0, 0)), (0, 0))
 
     def test_to_vector(self):
-        self.assertTrue(np.equal(model3.to_vector(), np.array([0] * (model3.field.size + 5))))
-        self.assertTrue(np.equal(model5.to_vector(), np.array([0] * (model5.field.size + 5))))
+        self.assertTrue(np.equal(model3.game_vector, np.array([0] * (model3.field_size + 5))))
+        self.assertTrue(np.equal(model5.game_vector, np.array([0] * (model5.field_size + 5))))
 
     def field_size_2_edge_size(self):
-        self.assertTrue(AbaloneModel.get_edge_size(model3.field.size), model3.edge_size)
-        self.assertTrue(AbaloneModel.get_edge_size(model5.field.size), model5.edge_size)
+        self.assertTrue(AbaloneModel.get_edge_size(model3.field_size), model3.edge_size)
+        self.assertTrue(AbaloneModel.get_edge_size(model5.field_size), model5.edge_size)
 
     def test_can_push_stone(self):
         pass
