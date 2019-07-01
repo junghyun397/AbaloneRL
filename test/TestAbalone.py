@@ -7,9 +7,15 @@ from abalone import AbaloneModel
 model3 = AbaloneModel.AbaloneAgent(edge_size=3)
 model5 = AbaloneModel.AbaloneAgent(edge_size=5)
 
-
+# Convert Pos-Dimension resource
 model3_pos_list = [((0, 0), 0), ((1, 1), 4), ((3, 1), 12)]
 model5_pos_list = [((0, 0), 0), ((1, 1), 6), ((5, 1), 35), ((6, 2), 43), ((7, 3), 50), ((7, 5), 52), ((8, 4), 56)]
+
+# Pos-Validation resource
+model3_validation_pos = [((0, 0), True), ((1, 3), True), ((2, 4), True),
+                         ((3, 0), False), ((4, 1), False), ((5, 1), False, ((4, 5), False))]
+model5_validation_pos = [((0, 0), True), ((2, 6), True), ((4, 8), True), ((5, 8), True),
+                         ((5, 0), False), ((6, 1), False), ((8, 3), False)]
 
 
 class TestAbalone(unittest.TestCase):
@@ -23,27 +29,6 @@ class TestAbalone(unittest.TestCase):
         for n in model5_pos_list:
             self.assertEqual(model5.get_1d_pos(*n[0]), n[1])
 
-    def test_invalid_pos(self):
-        # Model 3
-        self.assertTrue(model3.check_valid_pos(0, 0))
-        self.assertTrue(model3.check_valid_pos(1, 3))
-        self.assertTrue(model3.check_valid_pos(2, 4))
-
-        self.assertFalse(model3.check_valid_pos(3, 0))
-        self.assertFalse(model3.check_valid_pos(4, 1))
-        self.assertFalse(model3.check_valid_pos(5, 1))
-        self.assertFalse(model3.check_valid_pos(4, 5))
-
-        # Model 5
-        self.assertTrue(model5.check_valid_pos(0, 0))
-        self.assertTrue(model5.check_valid_pos(2, 6))
-        self.assertTrue(model5.check_valid_pos(4, 8))
-        self.assertTrue(model5.check_valid_pos(5, 8))
-
-        self.assertFalse(model5.check_valid_pos(5, 0))
-        self.assertFalse(model5.check_valid_pos(6, 1))
-        self.assertFalse(model5.check_valid_pos(8, 3))
-
     def test_1d_2_2d_pos(self):
         # Model 3
         for n in model3_pos_list:
@@ -52,6 +37,15 @@ class TestAbalone(unittest.TestCase):
         # Model 5
         for n in model5_pos_list:
             self.assertEqual(model5.get_2d_pos(n[1]), n[0])
+
+    def test_validation_pos(self):
+        # Model 3
+        for n in model3_validation_pos:
+            self.assertEqual(model3.check_valid_pos(*n[0]), n[1])
+
+        # Model 5
+        for n in model5_validation_pos:
+            self.assertEqual(model5.check_valid_pos(*n[0]), n[1])
 
     def test_to_vector(self):
         self.assertTrue(np.array_equal(model3.game_vector, np.array([0] * (model3.field_size + 5))))
