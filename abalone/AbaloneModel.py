@@ -57,13 +57,13 @@ class AbaloneAgent:
 
         self.get_1d_pos, self.get_2d_pos = get_pos_method(edge_size)
 
-        self.turn_out_black = 0
-        self.turn_out_white = 0
+        self.current_out_black = 0
+        self.current_out_white = 0
 
     # Bin Data
 
     def set_game_vector(self, vector: np.ndarray) -> None:
-        self.turn_out_black, self.turn_out_white = 0, 0
+        self.current_out_black, self.current_out_white = 0, 0
         self.game_vector = vector
 
     def reset(self):
@@ -95,10 +95,10 @@ class AbaloneAgent:
     # Game Control
 
     def next_turn(self) -> (int, int, Optional[StoneColor]):
-        self.game_vector[3] += self.turn_out_black
-        self.game_vector[4] += self.turn_out_white
-        temp_out_black, temp_out_white = self.turn_out_black, self.turn_out_white
-        self.turn_out_black, self.turn_out_white = 0, 0
+        self.game_vector[3] += self.current_out_black
+        self.game_vector[4] += self.current_out_white
+        temp_out_black, temp_out_white = self.current_out_black, self.current_out_white
+        self.current_out_black, self.current_out_white = 0, 0
 
         self.game_vector[1] += 1
         self._flip_color()
@@ -210,12 +210,6 @@ class AbaloneAgent:
         return self.game_vector[5 + self.get_1d_pos(y, x)]
 
     # Position Data
-
-    def get_1d_pos(self, y: int, x: int) -> int:
-        pass
-
-    def get_2d_pos(self, index: int) -> (int, int):
-        pass
 
     def check_valid_pos(self, y: int, x: int) -> bool:
         if y < self.edge_size:
