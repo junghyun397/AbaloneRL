@@ -6,6 +6,16 @@ import numpy as np
 from abalone.HexDescription import HexDescription
 from abalone.StoneColor import StoneColor
 
+_indexed_pos = dict()
+
+
+def _create_indexed_pos(edge_size: int) -> None:
+    _indexed_pos[edge_size] = dict()
+
+
+_create_indexed_pos(3)
+_create_indexed_pos(5)
+
 
 def get_field_size(edge_size: int) -> int:
     return 3 * edge_size ** 2 - 3 * edge_size + 1
@@ -27,6 +37,21 @@ def get_pos_method(edge_size: int) -> (Callable[[int, int], int], Callable[[int]
             return 0, 0
         else:
             return 0, 0
+
+    return get_1d_pos, get_2d_pos
+
+
+def get_indexed_pos_method(edge_size: int) -> (Callable[[int, int], int], Callable[[int], Tuple[int, int]]):
+    if edge_size is not 3 or 5:
+        return get_pos_method(edge_size)
+
+    temp_map = _indexed_pos[edge_size]
+
+    def get_1d_pos(y: int, x: int) -> int:
+        return temp_map[y, x]
+
+    def get_2d_pos(index: int) -> (int, int):
+        return temp_map[index]
 
     return get_1d_pos, get_2d_pos
 
@@ -166,7 +191,8 @@ class AbaloneAgent:
             if y < self.edge_size:
                 return [self.game_vector[5 + self.get_1d_pos(y, xp)] for xp in reversed(range(0, x))]
             else:
-                return [self.game_vector[5 + self.get_1d_pos(y, xp)] for xp in reversed(range(y - self.edge_size + 1, x))]
+                return [self.game_vector[5 + self.get_1d_pos(y, xp)] for xp in
+                        reversed(range(y - self.edge_size + 1, x))]
         elif description == HexDescription.YP:
             if x < self.edge_size:
                 return [self.game_vector[5 + self.get_1d_pos(yp, x)] for yp in range(y, self.edge_size + x)]
@@ -176,12 +202,14 @@ class AbaloneAgent:
             if x < self.edge_size:
                 return [self.game_vector[5 + self.get_1d_pos(yp, x)] for yp in reversed(range(0, y))]
             else:
-                return [self.game_vector[5 + self.get_1d_pos(yp, x)] for yp in reversed(range(x - self.edge_size + 1, x))]
+                return [self.game_vector[5 + self.get_1d_pos(yp, x)] for yp in
+                        reversed(range(x - self.edge_size + 1, x))]
         elif description == HexDescription.ZP:
             return [self.game_vector[5 + self.get_1d_pos(yp, xp)] for yp, xp in
                     zip(range(y, self.edge_size * 2 - 2), range(x, self.edge_size * 2 - 2))]
         elif description == HexDescription.ZM:
-            return [self.game_vector[5 + self.get_1d_pos(yp, xp)] for yp, xp in zip(reversed(range(0, y)), reversed(range(0, x)))]
+            return [self.game_vector[5 + self.get_1d_pos(yp, xp)] for yp, xp in
+                    zip(reversed(range(0, y)), reversed(range(0, x)))]
 
     def set_line(self, y: int, x: int, description: HexDescription, line: list) -> None:
         if description == HexDescription.XP:
