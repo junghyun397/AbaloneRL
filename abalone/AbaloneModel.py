@@ -1,21 +1,13 @@
 import math
-from typing import Callable, Tuple, Optional
+from typing import Callable, Tuple, Optional, Iterator
 
 import numpy as np
 
 from abalone.HexDescription import HexDescription
 from abalone.StoneColor import StoneColor
 
-_indexed_pos = dict()
 
-
-def _create_indexed_pos(edge_size: int) -> None:
-    _indexed_pos[edge_size] = dict()
-
-
-_create_indexed_pos(3)
-_create_indexed_pos(5)
-
+# Vector Size Control
 
 def get_field_size(edge_size: int) -> int:
     return 3 * edge_size ** 2 - 3 * edge_size + 1
@@ -24,6 +16,45 @@ def get_field_size(edge_size: int) -> int:
 def get_edge_size(field_size: int) -> int:
     return int((3 + math.sqrt(12 * field_size - 3)) / 6)
 
+
+# Indexed-Pos Generator
+
+def pos_generator(edge_size: int) -> Iterator[Tuple[int, int, int]]:
+    index, y, x = 0, 0, 0
+    edge_cut, shift_x = edge_size, 0
+    while index < get_field_size(edge_size):
+        if edge_cut == x:
+            if edge_cut < edge_size * 2 - 1:
+                edge_cut += 1
+            else:
+                shift_x += 1
+                edge_cut -= 1
+            y += 1
+            x = 0
+        yield index, y, x + shift_x
+        index += 1
+        x += 1
+
+
+_indexed_pos = dict()
+
+
+def _create_indexed_pos(edge_size: int) -> None:
+    _indexed_pos[edge_size] = dict()
+    for index, y, x in pos_generator(edge_size):
+        _indexed_pos[index] = y, x
+        _indexed_pos[y, x] = index
+
+
+def _build_indexed_pos(target: tuple) -> None:
+    for n in target:
+        _create_indexed_pos(n)
+
+
+_build_indexed_pos((3, 5))
+
+
+# Pos Generator
 
 def get_pos_method(edge_size: int) -> (Callable[[int, int], int], Callable[[int], Tuple[int, int]]):
     def get_1d_pos(y: int, x: int) -> int:
@@ -56,6 +87,8 @@ def get_indexed_pos_method(edge_size: int) -> (Callable[[int, int], int], Callab
     return get_1d_pos, get_2d_pos
 
 
+# Field Generator
+
 def new_field(size: int) -> np.ndarray:
     return np.zeros((get_field_size(size),), dtype=np.int8)
 
@@ -71,7 +104,8 @@ class AbaloneAgent:
 
     def __init__(self,
                  edge_size: int = 5,
-                 vector: np.ndarray = None):
+                 vector: np.ndarray = None,
+                 use_indexed_pos: bool = False):
         if vector is None:
             vector = new_vector(edge_size)
 
@@ -80,7 +114,10 @@ class AbaloneAgent:
 
         self.field_size = get_field_size(edge_size)
 
-        self.get_1d_pos, self.get_2d_pos = get_pos_method(edge_size)
+        if use_indexed_pos:
+            self.get_1d_pos, self.get_2d_pos = get_indexed_pos_method(edge_size)
+        else:
+            self.get_1d_pos, self.get_2d_pos = get_pos_method(edge_size)
 
         self.current_out_black = 0
         self.current_out_white = 0

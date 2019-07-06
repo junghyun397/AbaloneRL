@@ -20,6 +20,15 @@ model5_validation_pos = [((0, 0), True), ((2, 6), True), ((4, 8), True), ((5, 8)
 
 class TestAbalone(unittest.TestCase):
 
+    def test_pos_generator(self):
+        for index, y, x in AbaloneModel.pos_generator(3):
+            self.assertTrue(index < AbaloneModel.get_field_size(3))
+            self.assertEqual(model3.get_1d_pos(y, x), index)
+
+        for index, x, y in AbaloneModel.pos_generator(5):
+            self.assertTrue(index < AbaloneModel.get_field_size(5))
+            self.assertEqual(model5.get_1d_pos(y, x), index)
+
     def test_2d_2_1d_pos(self):
         # Model 3
         for n in model3_pos_list:
