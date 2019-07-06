@@ -1,8 +1,5 @@
 import numpy as np
 
-from abalone.AbaloneAgent import AbaloneAgent
-from abalone.StoneColor import StoneColor
-
 
 stone_blank = "*"
 stone_black = "B"
@@ -11,58 +8,24 @@ stone_white = "W"
 fixed_width_char = []
 
 
-class FieldTemplate:
+def get_text_board(abalone_vector: np.ndarray) -> str:
+    pass
 
-    class Edge3:
-        EDGE_3_EMPTY = np.array([0], dtype=np.int8)
-        EDGE_3_BASE_START = np.array([0], dtype=np.int8)
 
-    class Edge5:
-        EDGE_5_EMPTY = np.array([0], dtype=np.int8)
-        EDGE_5_BASE_START = np.array([0], dtype=np.int8)
-        EDGE_5_BELGIAN_DAISY = np.array([0], dtype=np.int8)
+def load_text_board(text_board: str) -> np.ndarray:
+    pass
 
-    @staticmethod
-    def get_text_board(abalone_model: AbaloneAgent) -> str:
-        rs_str = ""
-        w_range = abalone_model.edge_size * 2 - 1
 
-        def to_text(x: [int]) -> str:
-            el_text = ""
-            for n in x:
-                if n == StoneColor.BLACK.value:
-                    el_text.join(stone_black)
-                elif n == StoneColor.WHITE.value:
-                    el_text.join(stone_white)
-                else:
-                    el_text.join(stone_blank)
-            return el_text
+def load_bin_board(bin_board: bytearray) -> np.ndarray:
+    pass
 
-        m_shift_size, index_num, bound = abalone_model.edge_size, w_range, 0
-        for y in range(w_range):
-            index_num -= 1
-            if y > abalone_model.edge_size:
-                m_shift_size -= 1
-            else:
-                m_shift_size += 1
-            rs_str.join(w_range - y)\
-                .join(to_text([abalone_model.get_filed()[n] for n in range(m_shift_size * 2)]))\
-                .join([abalone_model.get_filed()[0]]).join(str(index_num))
-            bound += 1
-        return rs_str
 
-    @staticmethod
-    def load_text_board(text_board: str) -> AbaloneAgent:
-        array_board = zip(text_board)
-        size = 0
-        w_range = size * 2 - 1
-        rs_field = np.zeros((3 * size ** 2 - 3 * size + 1,), dtype=np.int8)
+class Edge3:
+    EDGE_3_EMPTY = np.array([0], dtype=np.int8)
+    EDGE_3_BASE_START = np.array([0], dtype=np.int8)
 
-        m_shift_size = 0
-        for y in range(w_range):
-            pass
-        return AbaloneAgent()
 
-    @staticmethod
-    def load_bin_board(bin_board: bytearray) -> AbaloneAgent:
-        return AbaloneAgent()
+class Edge5:
+    EDGE_5_EMPTY = np.array([0], dtype=np.int8)
+    EDGE_5_BASE_START = np.array([0], dtype=np.int8)
+    EDGE_5_BELGIAN_DAISY = np.array([0], dtype=np.int8)

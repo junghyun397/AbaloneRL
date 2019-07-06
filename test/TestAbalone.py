@@ -25,7 +25,7 @@ class TestAbalone(unittest.TestCase):
             self.assertTrue(index < AbaloneModel.get_field_size(3))
             self.assertEqual(model3.get_1d_pos(y, x), index)
 
-        for index, x, y in AbaloneModel.pos_generator(5):
+        for index, y, x in AbaloneModel.pos_generator(5):
             self.assertTrue(index < AbaloneModel.get_field_size(5))
             self.assertEqual(model5.get_1d_pos(y, x), index)
 

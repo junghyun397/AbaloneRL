@@ -23,12 +23,12 @@ def pos_generator(edge_size: int) -> Iterator[Tuple[int, int, int]]:
     index, y, x = 0, 0, 0
     edge_cut, shift_x = edge_size, 0
     while index < get_field_size(edge_size):
-        if edge_cut == x:
-            if edge_cut < edge_size * 2 - 1:
+        if not edge_cut > x:
+            if y < edge_size - 1:
                 edge_cut += 1
             else:
-                shift_x += 1
                 edge_cut -= 1
+                shift_x += 1
             y += 1
             x = 0
         yield index, y, x + shift_x
@@ -51,7 +51,7 @@ def _build_indexed_pos(target: tuple) -> None:
         _create_indexed_pos(n)
 
 
-_build_indexed_pos((3, 5))
+# _build_indexed_pos((3, 5))
 
 
 # Pos Generator
@@ -59,7 +59,7 @@ _build_indexed_pos((3, 5))
 def get_pos_method(edge_size: int) -> (Callable[[int, int], int], Callable[[int], Tuple[int, int]]):
     def get_1d_pos(y: int, x: int) -> int:
         if y < edge_size:
-            return int(y * (-y + 2 * edge_size + 1) / 2) + x
+            return int((y * (y - (2 * edge_size) + 1) + 2) / 2) + x
         else:
             return int((y * (-y + 6 * edge_size - 5) + -2 * edge_size * (edge_size - 2) - 2) / 2) + x
 
