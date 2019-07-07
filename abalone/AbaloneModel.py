@@ -36,14 +36,15 @@ def pos_generator(edge_size: int) -> Iterator[Tuple[int, int, int]]:
         x += 1
 
 
+_indexed_edge_size = (3, 5)
 _indexed_pos = dict()
 
 
 def _create_indexed_pos(edge_size: int) -> None:
     _indexed_pos[edge_size] = dict()
     for index, y, x in pos_generator(edge_size):
-        _indexed_pos[index] = y, x
-        _indexed_pos[y, x] = index
+        _indexed_pos[edge_size][index] = y, x
+        _indexed_pos[edge_size][y, x] = index
 
 
 def _build_indexed_pos(target: tuple) -> None:
@@ -51,7 +52,7 @@ def _build_indexed_pos(target: tuple) -> None:
         _create_indexed_pos(n)
 
 
-# _build_indexed_pos((3, 5))
+_build_indexed_pos(_indexed_edge_size)
 
 
 # Pos Generator
@@ -59,12 +60,12 @@ def _build_indexed_pos(target: tuple) -> None:
 def get_pos_method(edge_size: int) -> (Callable[[int, int], int], Callable[[int], Tuple[int, int]]):
     def get_1d_pos(y: int, x: int) -> int:
         if y < edge_size:
-            return int((y * (y - (2 * edge_size) + 1) + 2) / 2) + x
+            return int(((y + edge_size - 1) * (y + edge_size) - (edge_size - 1) * edge_size) / 2 + x)
         else:
-            return int((y * (-y + 6 * edge_size - 5) + -2 * edge_size * (edge_size - 2) - 2) / 2) + x
+            return int((y * (6 * edge_size - y - 5) + -2 * edge_size * (edge_size - 2) - 2) / 2 + x)
 
     def get_2d_pos(index: int) -> (int, int):
-        if index < edge_size:
+        if index < edge_size * (3 * edge_size - 1) / 2:
             return 0, 0
         else:
             return 0, 0
@@ -73,7 +74,7 @@ def get_pos_method(edge_size: int) -> (Callable[[int, int], int], Callable[[int]
 
 
 def get_indexed_pos_method(edge_size: int) -> (Callable[[int, int], int], Callable[[int], Tuple[int, int]]):
-    if edge_size is not 3 or 5:
+    if edge_size not in _indexed_edge_size:
         return get_pos_method(edge_size)
 
     temp_map = _indexed_pos[edge_size]

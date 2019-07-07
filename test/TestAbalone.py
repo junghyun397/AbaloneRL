@@ -70,5 +70,8 @@ class TestAbalone(unittest.TestCase):
     def test_push_stone(self):
         pass
 
+    def test_out_stone(self):
+        pass
+
     def test_end_game(self):
         pass
