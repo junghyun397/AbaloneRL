@@ -4,8 +4,8 @@ import numpy as np
 
 from abalone import AbaloneModel
 
-model3 = AbaloneModel.AbaloneAgent(edge_size=3)
-model5 = AbaloneModel.AbaloneAgent(edge_size=5)
+model3 = AbaloneModel.AbaloneAgent(edge_size=3, use_indexed_pos=True)
+model5 = AbaloneModel.AbaloneAgent(edge_size=5, use_indexed_pos=True)
 
 # Convert Pos-Dimension resource
 model3_pos_list = [((0, 0), 0), ((1, 1), 4), ((3, 1), 12)]
@@ -57,8 +57,8 @@ class TestAbalone(unittest.TestCase):
             self.assertEqual(model5.check_valid_pos(*n[0]), n[1])
 
     def test_to_vector(self):
-        self.assertTrue(np.array_equal(model3.game_vector, np.array([0] * (model3.field_size + 5))))
-        self.assertTrue(np.array_equal(model5.game_vector, np.array([0] * (model5.field_size + 5))))
+        self.assertTrue(np.array_equal(model3.game_vector, np.array([3] + [0] * (model3.field_size + 4), dtype=np.int8)))
+        self.assertTrue(np.array_equal(model5.game_vector, np.array([5] + [0] * (model5.field_size + 4), dtype=np.int8)))
 
     def field_size_2_edge_size(self):
         self.assertTrue(AbaloneModel.get_edge_size(model3.field_size), model3.edge_size)

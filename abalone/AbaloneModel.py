@@ -90,12 +90,12 @@ def get_indexed_pos_method(edge_size: int) -> (Callable[[int, int], int], Callab
 
 # Field Generator
 
-def new_field(size: int) -> np.ndarray:
-    return np.zeros((get_field_size(size),), dtype=np.int8)
+def new_field(edge_size: int) -> np.ndarray:
+    return np.zeros((get_field_size(edge_size),), dtype=np.int8)
 
 
-def new_vector(size: int) -> np.ndarray:
-    return np.zeros((5 + get_field_size(size),), dtype=np.int8)
+def new_vector(edge_size: int) -> np.ndarray:
+    return np.array([edge_size] + [0] * (get_field_size(edge_size) + 4), dtype=np.int8)
 
 
 # Game Vector Index
