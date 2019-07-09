@@ -14,7 +14,7 @@ class TestAbaloneIO(unittest.TestCase):
     def test_text_graphic(self):
         print(FieldTemplate.get_text_board(model3.game_vector), "\n")
         print(FieldTemplate.get_text_board(model5.game_vector), "\n")
-        print(FieldTemplate.get_text_board(model10.game_vector)), "\n"
+        print(FieldTemplate.get_text_board(model10.game_vector), "\n")
 
     def test_load_model_by_text(self):
         self.assertTrue(np.array_equal(FieldTemplate.load_text_board(

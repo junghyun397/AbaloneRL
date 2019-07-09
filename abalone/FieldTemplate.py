@@ -27,12 +27,12 @@ def get_text_board(game_vector: np.ndarray) -> str:
 
 
 def load_text_board(info_vector: list, text_board: str) -> np.ndarray:
-    return np.array(info_vector
-                    + list(filter(partial(is_not, None),
-                                  [(lambda v: 0 if v == "+" else
-                                   (StoneColor.BLACK.value if v == "@" else
-                                    (StoneColor.WHITE.value if v == "#" else None)))(i)
-                                   for i in itertools.chain(*text_board.split("\n")[::-1])])))
+    return np.array(info_vector +
+                    list(filter(partial(is_not, None),
+                                [(lambda v: 0 if v == "+" else
+                                 (StoneColor.BLACK.value if v == "@" else
+                                  (StoneColor.WHITE.value if v == "#" else None)))(i)
+                                 for i in itertools.chain(*text_board.split("\n")[::-1])])))
 
 
 def get_basic_start(edge_size: int) -> np.ndarray:

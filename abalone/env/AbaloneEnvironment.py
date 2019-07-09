@@ -1,5 +1,5 @@
 import numpy as np
-from abalone import AbaloneModel
+from abalone import AbaloneModel, FieldTemplate
 
 from abalone.HexDescription import HexDescription
 from abalone.StoneColor import StoneColor
@@ -11,7 +11,9 @@ from agent.reward.SuccessMoveReward import SuccessMoveReward
 class AbaloneEnvironment(Environment):
 
     def __init__(self,
-                 abalone_model: AbaloneModel.AbaloneAgent = AbaloneModel.AbaloneAgent(),
+                 abalone_model: AbaloneModel.AbaloneAgent = AbaloneModel.AbaloneAgent(edge_size=5,
+                                                                                      use_indexed_pos=False,
+                                                                                      vector=FieldTemplate.get_basic_start(5)),
                  reward_module: RewardModule = SuccessMoveReward()):
         super().__init__(abalone_model.field_size)
         self.abalone_model = abalone_model
@@ -24,17 +26,17 @@ class AbaloneEnvironment(Environment):
 
         end, win = False, False
         if winner is not None:
-            if winner != self.abalone_model.get_current_color():
+            if winner != self.abalone_model.game_vector[2]:
                 win = True
             end = True
-            self.abalone_model.reset()
+            self.abalone_model.reset(FieldTemplate.get_basic_start(self.abalone_model.edge_size))
 
-        if self.abalone_model.get_current_color() == StoneColor.BLACK:
+        if self.abalone_model.game_vector[2] == StoneColor.BLACK:
             out = out_black
         else:
             out = out_white
 
-        return self.abalone_model.game_vector, self.reward_module.get_reward(success, self.abalone_model.get_turns(), out, end, win), end
+        return self.abalone_model.get_filed(), self.reward_module.get_reward(success, self.abalone_model.get_turns(), out, end, win), end, self.abalone_model.get_info()
 
     def get_state(self) -> np.ndarray:
         return self.abalone_model.game_vector

@@ -128,8 +128,10 @@ class AbaloneAgent:
         self.current_out_black, self.current_out_white = 0, 0
         self.game_vector = vector
 
-    def reset(self):
-        self.game_vector = np.zeros((5 + get_field_size(self.edge_size),), dtype=np.int8)
+    def reset(self, vector: np.ndarray = None):
+        if vector is None:
+            vector = new_vector(self.edge_size)
+        self.game_vector = vector
 
     def copy(self):
         return AbaloneAgent(self.edge_size, np.copy(self.game_vector))
@@ -138,6 +140,9 @@ class AbaloneAgent:
         return np.copy(self.game_vector)
 
     # Game Data
+
+    def get_info(self) -> np.ndarray:
+        return self.game_vector[::5]
 
     def get_filed(self) -> np.ndarray:
         return self.game_vector[5::]
