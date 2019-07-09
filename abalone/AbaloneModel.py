@@ -22,13 +22,12 @@ def get_edge_size(field_size: int) -> int:
 def pos_generator(edge_size: int) -> Iterator[Tuple[int, int, int]]:
     index, y, x = 0, 0, 0
     edge_cut, shift_x = edge_size, 0
+    ef = (lambda v: -1 if v > edge_size - 2 else 1)
     while index < get_field_size(edge_size):
-        if not edge_cut > x:
-            if y < edge_size - 1:
-                edge_cut += 1
-            else:
-                edge_cut -= 1
+        if edge_cut == x:
+            if y > edge_size - 2:
                 shift_x += 1
+            edge_cut += ef(y)
             y += 1
             x = 0
         yield index, y, x + shift_x
@@ -36,7 +35,7 @@ def pos_generator(edge_size: int) -> Iterator[Tuple[int, int, int]]:
         x += 1
 
 
-_indexed_edge_size = (3, 5)
+_indexed_edge_size = (3, 5, 10)
 _indexed_pos = dict()
 
 
