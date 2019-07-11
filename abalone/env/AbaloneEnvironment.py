@@ -26,7 +26,7 @@ class AbaloneEnvironment(Environment):
 
         end, win = False, False
         if winner is not None:
-            if winner != self.abalone_model.game_vector[2]:
+            if winner.value != self.abalone_model.game_vector[2]:
                 win = True
             end = True
             self.abalone_model.reset(FieldTemplate.get_basic_start(self.abalone_model.edge_size))
@@ -36,7 +36,7 @@ class AbaloneEnvironment(Environment):
         else:
             out = out_white
 
-        return self.abalone_model.get_filed(), self.reward_module.get_reward(success, self.abalone_model.get_turns(), out, end, win), end, self.abalone_model.get_info()
+        return self.abalone_model.game_vector, self.reward_module.get_reward(success, self.abalone_model.get_turns(), out, end, win), end
 
     def get_state(self) -> np.ndarray:
         return self.abalone_model.game_vector

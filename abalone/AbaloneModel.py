@@ -35,7 +35,6 @@ def pos_generator(edge_size: int) -> Iterator[Tuple[int, int, int]]:
         x += 1
 
 
-_indexed_edge_size = (3, 5, 10)
 _indexed_pos = dict()
 
 
@@ -44,14 +43,6 @@ def _create_indexed_pos(edge_size: int) -> None:
     for index, y, x in pos_generator(edge_size):
         _indexed_pos[edge_size][index] = y, x
         _indexed_pos[edge_size][y, x] = index
-
-
-def _build_indexed_pos(target: tuple) -> None:
-    for n in target:
-        _create_indexed_pos(n)
-
-
-_build_indexed_pos(_indexed_edge_size)
 
 
 # Pos Generator
@@ -73,8 +64,8 @@ def get_pos_method(edge_size: int) -> (Callable[[int, int], int], Callable[[int]
 
 
 def get_indexed_pos_method(edge_size: int) -> (Callable[[int, int], int], Callable[[int], Tuple[int, int]]):
-    if edge_size not in _indexed_edge_size:
-        return get_pos_method(edge_size)
+    if _indexed_pos[edge_size] is None:
+        _create_indexed_pos(edge_size)
 
     temp_map = _indexed_pos[edge_size]
 
@@ -119,13 +110,14 @@ class AbaloneAgent:
         else:
             self.get_1d_pos, self.get_2d_pos = get_pos_method(edge_size)
 
+        self.current_move_stone = 0
         self.current_out_black = 0
         self.current_out_white = 0
 
     # Bin Data
 
     def set_game_vector(self, vector: np.ndarray) -> None:
-        self.current_out_black, self.current_out_white = 0, 0
+        self.current_move_stone, self.current_out_black, self.current_out_white = 0, 0, 0
         self.game_vector = vector
 
     def reset(self, vector: np.ndarray = None):
@@ -165,7 +157,7 @@ class AbaloneAgent:
         self.game_vector[3] += self.current_out_black
         self.game_vector[4] += self.current_out_white
         temp_out_black, temp_out_white = self.current_out_black, self.current_out_white
-        self.current_out_black, self.current_out_white = 0, 0
+        self.current_move_stone, self.current_out_black, self.current_out_white = 0, 0, 0
 
         self.game_vector[1] += 1
         self._flip_color()
@@ -226,32 +218,30 @@ class AbaloneAgent:
     def get_line(self, y: int, x: int, description: HexDescription) -> list:
         if description == HexDescription.XP:
             if y < self.edge_size:
-                return [self.game_vector[5 + self.get_1d_pos(y, xp)] for xp in range(x, self.edge_size + y - 1)]
+                return [self.game_vector[5 + self.get_1d_pos(y, xp)] for xp in range(x, self.edge_size + y)]
             else:
-                return [self.game_vector[5 + self.get_1d_pos(y, xp)] for xp in range(x, self.edge_size * 2 - 2)]
+                return [self.game_vector[5 + self.get_1d_pos(y, xp)] for xp in range(x, self.edge_size * 3 - y + x - 2)]
         elif description == HexDescription.XM:
             if y < self.edge_size:
-                return [self.game_vector[5 + self.get_1d_pos(y, xp)] for xp in reversed(range(0, x))]
+                return [self.game_vector[5 + self.get_1d_pos(y, x - xp)] for xp in range(0, x + 1)]
             else:
-                return [self.game_vector[5 + self.get_1d_pos(y, xp)] for xp in
-                        reversed(range(y - self.edge_size + 1, x))]
+                return [self.game_vector[5 + self.get_1d_pos(y, x - xp)] for xp in range(0, x - y + self.edge_size)]
         elif description == HexDescription.YP:
             if x < self.edge_size:
                 return [self.game_vector[5 + self.get_1d_pos(yp, x)] for yp in range(y, self.edge_size + x)]
             else:
-                return [self.game_vector[5 + self.get_1d_pos(yp, x)] for yp in range(y, self.edge_size * 2 - 2)]
+                return [self.game_vector[5 + self.get_1d_pos(yp, x)] for yp in range(y, self.edge_size * 3 - x - 2)]
         elif description == HexDescription.YM:
             if x < self.edge_size:
-                return [self.game_vector[5 + self.get_1d_pos(yp, x)] for yp in reversed(range(0, y))]
+                return [self.game_vector[5 + self.get_1d_pos(y - yp, x)] for yp in range(0, y + 1)]
             else:
-                return [self.game_vector[5 + self.get_1d_pos(yp, x)] for yp in
-                        reversed(range(x - self.edge_size + 1, x))]
+                return [self.game_vector[5 + self.get_1d_pos(y - yp, x)] for yp in range(0, y - x + self.edge_size)]
         elif description == HexDescription.ZP:
             return [self.game_vector[5 + self.get_1d_pos(yp, xp)] for yp, xp in
                     zip(range(y, self.edge_size * 2 - 2), range(x, self.edge_size * 2 - 2))]
         elif description == HexDescription.ZM:
-            return [self.game_vector[5 + self.get_1d_pos(yp, xp)] for yp, xp in
-                    zip(reversed(range(0, y)), reversed(range(0, x)))]
+            return [self.game_vector[5 + self.get_1d_pos(y - yp, x - xp)] for yp, xp in
+                    zip(range(0, y), range(0, x))]
 
     def set_line(self, y: int, x: int, description: HexDescription, line: list) -> None:
         if description == HexDescription.XP:
