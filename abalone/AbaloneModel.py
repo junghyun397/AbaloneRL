@@ -1,4 +1,5 @@
 import math
+from itertools import zip_longest
 from typing import Callable, Tuple, Optional, Iterator
 
 import numpy as np
@@ -166,31 +167,28 @@ class AbaloneAgent:
     # Logic Filed Control
 
     def try_push_stone(self, y: int, x: int, description: HexDescription) -> bool:
-        line = self.can_push_stone(y, x, description)
-        if line is None:
+        line, move_stone = self.can_push_stone(y, x, description)
+        if line is None or move_stone + self.current_move_stone > 3:
             return False
         self.push_stone(y, x, description, line)
         return True
 
-    def can_push_stone(self, y: int, x: int, description: HexDescription) -> Optional[list]:
-        line = self.get_line(y, x, description)
+    def can_push_stone(self, y: int, x: int, description: HexDescription) -> (Optional[list], int):
+        line, move_stone = self.get_line(y, x, description), 0
         if len(line) < 2:
-            return None
+            return None, 0
 
-        my_count, opp_count = 0, 0
-        for s in line:
-            if s == self.game_vector[2]:
-                my_count += 1
-            elif s != 0:
-                if opp_count > my_count:
-                    return None
-                opp_count += 1
+        lm, om, flp = 0, 0, False
+        for n in line:
+            if n == StoneColor.NONE.value:
+                return (lambda v: line if v else None)(4 > lm > om), lm
+            elif n == self.game_vector[2]:
+                if flp:
+                    return None, 0
+                lm += 1
             else:
-                if my_count > opp_count:
-                    return line
-
-            if my_count > 3 or opp_count > 3:
-                return None
+                flp = True
+                om += 1
 
     def push_stone(self, y: int, x: int, description: HexDescription, line: list = None) -> None:
         if line is None:
@@ -230,18 +228,30 @@ class AbaloneAgent:
             if x < self.edge_size:
                 return [self.game_vector[5 + self.get_1d_pos(yp, x)] for yp in range(y, self.edge_size + x)]
             else:
-                return [self.game_vector[5 + self.get_1d_pos(yp, x)] for yp in range(y, self.edge_size * 3 - x - 2)]
+                return [self.game_vector[5 + self.get_1d_pos(yp, x)] for yp in range(y, self.edge_size * 2 - 1)]
         elif description == HexDescription.YM:
             if x < self.edge_size:
                 return [self.game_vector[5 + self.get_1d_pos(y - yp, x)] for yp in range(0, y + 1)]
             else:
                 return [self.game_vector[5 + self.get_1d_pos(y - yp, x)] for yp in range(0, y - x + self.edge_size)]
         elif description == HexDescription.ZP:
-            return [self.game_vector[5 + self.get_1d_pos(yp, xp)] for yp, xp in
-                    zip(range(y, self.edge_size * 2 - 2), range(x, self.edge_size * 2 - 2))]
+            if y < self.edge_size:
+                return [self.game_vector[5 + self.get_1d_pos(yp, xp)] for yp, xp in
+                        zip_longest(range(y, self.edge_size * 2 - 1), range(x, x + self.edge_size),
+                                    fillvalue=self.edge_size * 2 - 1)]
+            else:
+                return [self.game_vector[5 + self.get_1d_pos(yp, xp)] for yp, xp in
+                        zip_longest(range(y, self.edge_size * 2 - 1), range(x, x + self.edge_size),
+                                    fillvalue=self.edge_size * 2 - 1)]
         elif description == HexDescription.ZM:
-            return [self.game_vector[5 + self.get_1d_pos(y - yp, x - xp)] for yp, xp in
-                    zip(range(0, y), range(0, x))]
+            if x < self.edge_size:
+                return [self.game_vector[5 + self.get_1d_pos(y - yp, x - xp)] for yp, xp in
+                        zip_longest(range(0, y), range(0, x),
+                                    fillvalue=0)]
+            else:
+                return [self.game_vector[5 + self.get_1d_pos(y - yp, x - xp)] for yp, xp in
+                        zip_longest(range(0, y), range(0, x),
+                                    fillvalue=0)]
 
     def set_line(self, y: int, x: int, description: HexDescription, line: list) -> None:
         if description == HexDescription.XP:

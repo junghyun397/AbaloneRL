@@ -13,7 +13,8 @@ class AbaloneEnvironment(Environment):
     def __init__(self,
                  abalone_model: AbaloneModel.AbaloneAgent = AbaloneModel.AbaloneAgent(edge_size=5,
                                                                                       use_indexed_pos=False,
-                                                                                      vector=FieldTemplate.get_basic_start(5)),
+                                                                                      vector=FieldTemplate.get_basic_start(
+                                                                                          5)),
                  reward_module: RewardModule = SuccessMoveReward()):
         super().__init__(abalone_model.field_size)
         self.abalone_model = abalone_model
@@ -36,7 +37,7 @@ class AbaloneEnvironment(Environment):
         else:
             out = out_white
 
-        return self.abalone_model.game_vector, self.reward_module.get_reward(success, self.abalone_model.get_turns(), out, end, win), end
+        return self.abalone_model.game_vector, self.reward_module.get_reward(success, self.abalone_model.game_vector[1], out, end, win), end
 
     def get_state(self) -> np.ndarray:
         return self.abalone_model.game_vector
