@@ -1,6 +1,6 @@
 import numpy as np
-from abalone import AbaloneModel, FieldTemplate
 
+from abalone import AbaloneModel, FieldTemplate
 from abalone.HexDescription import HexDescription
 from abalone.StoneColor import StoneColor
 from agent.Environment import Environment
@@ -13,10 +13,9 @@ class AbaloneEnvironment(Environment):
     def __init__(self,
                  abalone_model: AbaloneModel.AbaloneAgent = AbaloneModel.AbaloneAgent(edge_size=5,
                                                                                       use_indexed_pos=False,
-                                                                                      vector=FieldTemplate.get_basic_start(
-                                                                                          5)),
+                                                                                      vector=FieldTemplate.get_basic_start(5)),
                  reward_module: RewardModule = SuccessMoveReward()):
-        super().__init__(abalone_model.field_size)
+        super().__init__(abalone_model.field_size * 6)
         self.abalone_model = abalone_model
         self.reward_module = reward_module
 

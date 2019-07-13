@@ -170,6 +170,7 @@ class AbaloneAgent:
         line, move_stone = self.can_push_stone(y, x, description)
         if line is None or move_stone + self.current_move_stone > 3:
             return False
+        self.current_move_stone += move_stone
         self.push_stone(y, x, description, line)
         return True
 
