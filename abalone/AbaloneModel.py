@@ -65,7 +65,7 @@ def get_pos_method(edge_size: int) -> (Callable[[int, int], int], Callable[[int]
 
 
 def get_indexed_pos_method(edge_size: int) -> (Callable[[int, int], int], Callable[[int], Tuple[int, int]]):
-    if _indexed_pos[edge_size] is None:
+    if _indexed_pos.get(edge_size) is None:
         _create_indexed_pos(edge_size)
 
     temp_map = _indexed_pos[edge_size]
@@ -154,42 +154,44 @@ class AbaloneAgent:
 
     # Game Control
 
-    def next_turn(self) -> (int, int, Optional[StoneColor]):
-        self.game_vector[3] += self.current_out_black
-        self.game_vector[4] += self.current_out_white
-        temp_out_black, temp_out_white = self.current_out_black, self.current_out_white
-        self.current_move_stone, self.current_out_black, self.current_out_white = 0, 0, 0
-
+    def next_turn(self) -> Optional[StoneColor]:
+        self.current_move_stone = 0
         self.game_vector[1] += 1
         self._flip_color()
-        return temp_out_black, temp_out_white, self.get_winner()
+        if self.game_vector[4] > 5:
+            return StoneColor.BLACK
+        elif self.game_vector[3] > 5:
+            return StoneColor.WHITE
+        return None
 
     # Logic Filed Control
 
-    def try_push_stone(self, y: int, x: int, description: HexDescription) -> bool:
-        line, move_stone = self.can_push_stone(y, x, description)
+    def try_push_stone(self, y: int, x: int, description: HexDescription) -> (bool, bool, int):
+        line, move_stone, dropped = self.can_push_stone(y, x, description)
         if line is None or move_stone + self.current_move_stone > 3:
-            return False
+            return False, False, 0
         self.current_move_stone += move_stone
         self.push_stone(y, x, description, line)
-        return True
+        return True, move_stone == 3, dropped
 
-    def can_push_stone(self, y: int, x: int, description: HexDescription) -> (Optional[list], int):
+    def can_push_stone(self, y: int, x: int, description: HexDescription) -> (Optional[list], int, int):
         line, move_stone = self.get_line(y, x, description), 0
-        if len(line) < 2:
-            return None, 0
+        if len(line) == 1:
+            return None, 1, -1
 
+        v_acc = (lambda v: line if v else None)
         lm, om, flp = 0, 0, False
         for n in line:
             if n == StoneColor.NONE.value:
-                return (lambda v: line if v else None)(4 > lm > om), lm
+                return v_acc(4 > lm > om), lm, 0
             elif n == self.game_vector[2]:
                 if flp:
-                    return None, 0
+                    return None, 0, 0
                 lm += 1
             else:
                 flp = True
                 om += 1
+        return v_acc(4 > lm > om), lm, 1
 
     def push_stone(self, y: int, x: int, description: HexDescription, line: list = None) -> None:
         if line is None:
@@ -199,18 +201,8 @@ class AbaloneAgent:
             self.game_vector[3] += 1
         elif line[len(line) - 1] == StoneColor.WHITE.value:
             self.game_vector[4] += 1
-
         line = [0] + line.pop()
         self.set_line(y, x, description, line)
-
-    # Game Observe
-
-    def get_winner(self) -> Optional[StoneColor]:
-        if self.game_vector[4] > 5:
-            return StoneColor.BLACK
-        elif self.game_vector[3] > 5:
-            return StoneColor.WHITE
-        return None
 
     # Bin Field Control
 
