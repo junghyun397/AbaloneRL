@@ -1,5 +1,4 @@
 import math
-from itertools import zip_longest
 from typing import Callable, Tuple, Optional, Iterator
 
 import numpy as np
@@ -23,12 +22,11 @@ def get_edge_size(field_size: int) -> int:
 def pos_generator(edge_size: int) -> Iterator[Tuple[int, int, int]]:
     index, y, x = 0, 0, 0
     edge_cut, shift_x = edge_size, 0
-    ef = (lambda v: -1 if v > edge_size - 2 else 1)
     while index < get_field_size(edge_size):
         if edge_cut == x:
             if y > edge_size - 2:
                 shift_x += 1
-            edge_cut += ef(y)
+            edge_cut += -1 if y > edge_size - 2 else 1
             y += 1
             x = 0
         yield index, y, x + shift_x
@@ -179,11 +177,10 @@ class AbaloneAgent:
         if len(line) == 1:
             return None, 1, -1
 
-        v_acc = (lambda v: line if v else None)
         lm, om, flp = 0, 0, False
         for n in line:
             if n == StoneColor.NONE.value:
-                return v_acc(4 > lm > om), lm, 0
+                return line if 4 > lm > om else None, lm, 0
             elif n == self.game_vector[2]:
                 if flp:
                     return None, 0, 0
@@ -191,7 +188,7 @@ class AbaloneAgent:
             else:
                 flp = True
                 om += 1
-        return v_acc(4 > lm > om), lm, 1
+        return line if 4 > lm > om else None, lm, 1
 
     def push_stone(self, y: int, x: int, description: HexDescription, line: list = None) -> None:
         if line is None:
@@ -211,7 +208,7 @@ class AbaloneAgent:
             if y < self.edge_size:
                 return [self.game_vector[5 + self.get_1d_pos(y, xp)] for xp in range(x, self.edge_size + y)]
             else:
-                return [self.game_vector[5 + self.get_1d_pos(y, xp)] for xp in range(x, self.edge_size * 3 - y + x - 2)]
+                return [self.game_vector[5 + self.get_1d_pos(y, xp)] for xp in range(x, self.edge_size - 1)]
         elif description == HexDescription.XM:
             if y < self.edge_size:
                 return [self.game_vector[5 + self.get_1d_pos(y, x - xp)] for xp in range(0, x + 1)]
@@ -228,23 +225,11 @@ class AbaloneAgent:
             else:
                 return [self.game_vector[5 + self.get_1d_pos(y - yp, x)] for yp in range(0, y - x + self.edge_size)]
         elif description == HexDescription.ZP:
-            if y < self.edge_size:
-                return [self.game_vector[5 + self.get_1d_pos(yp, xp)] for yp, xp in
-                        zip_longest(range(y, self.edge_size * 2 - 1), range(x, x + self.edge_size),
-                                    fillvalue=self.edge_size * 2 - 1)]
-            else:
-                return [self.game_vector[5 + self.get_1d_pos(yp, xp)] for yp, xp in
-                        zip_longest(range(y, self.edge_size * 2 - 1), range(x, x + self.edge_size),
-                                    fillvalue=self.edge_size * 2 - 1)]
+            return [self.game_vector[5 + self.get_1d_pos(yp, xp)] for yp, xp in
+                    zip(range(y, self.edge_size * 2 - 1), range(x, self.edge_size * 2 - 1))]
         elif description == HexDescription.ZM:
-            if x < self.edge_size:
-                return [self.game_vector[5 + self.get_1d_pos(y - yp, x - xp)] for yp, xp in
-                        zip_longest(range(0, y), range(0, x),
-                                    fillvalue=0)]
-            else:
-                return [self.game_vector[5 + self.get_1d_pos(y - yp, x - xp)] for yp, xp in
-                        zip_longest(range(0, y), range(0, x),
-                                    fillvalue=0)]
+            return [self.game_vector[5 + self.get_1d_pos(y - yp, x - xp)] for yp, xp in
+                    zip(range(0, y), range(0, x))]
 
     def set_line(self, y: int, x: int, description: HexDescription, line: list) -> None:
         if description == HexDescription.XP:

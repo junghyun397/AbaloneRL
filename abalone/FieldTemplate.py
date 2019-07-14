@@ -11,7 +11,6 @@ from abalone.StoneColor import StoneColor
 def get_text_board(game_vector: np.ndarray) -> str:
     rs_str = (chr(32) * (game_vector[0] + 2)) + str().join([str(i + 1) + chr(32) for i in range(game_vector[0])])
     tef, idx = (lambda w: "+" if w == StoneColor.NONE.value else ("@" if w == StoneColor.BLACK.value else "#")), 0
-    ids = (lambda v: game_vector[0] + n if n < game_vector[0] else game_vector[0] * 3 - v - 2)
     for n in range(game_vector[0] * 2 - 1):
         if n < game_vector[0]:
             rs_str = str().join(chr(32) * (game_vector[0] - n - 1)) + chr(65 + n) + chr(32) \
@@ -22,16 +21,16 @@ def get_text_board(game_vector: np.ndarray) -> str:
             rs_str = str().join(chr(32) * (n - game_vector[0])) + chr(32) + chr(65 + n) + chr(32) \
                      + chr(32).join([tef(game_vector[5 + idx + c]) for c in range(game_vector[0] * 3 - n - 2)]) \
                      + "\n" + rs_str
-        idx += ids(n)
+        idx += game_vector[0] + n if n < game_vector[0] else game_vector[0] * 3 - n - 2
     return rs_str
 
 
 def load_text_board(info_vector: list, text_board: str) -> np.ndarray:
     return np.array(info_vector +
                     list(filter(partial(is_not, None),
-                                [(lambda v: 0 if v == "+" else
-                                 (StoneColor.BLACK.value if v == "@" else
-                                  (StoneColor.WHITE.value if v == "#" else None)))(i)
+                                [0 if i == "+" else
+                                 (StoneColor.BLACK.value if i == "@" else
+                                  (StoneColor.WHITE.value if i == "#" else None))
                                  for i in itertools.chain(*text_board.split("\n")[::-1])])))
 
 

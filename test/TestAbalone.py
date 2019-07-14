@@ -3,6 +3,7 @@ import unittest
 import numpy as np
 
 from abalone import AbaloneModel
+from abalone.HexDescription import HexDescription
 
 model3 = AbaloneModel.AbaloneAgent(edge_size=3, use_indexed_pos=True)
 model5 = AbaloneModel.AbaloneAgent(edge_size=5, use_indexed_pos=True)
@@ -65,7 +66,7 @@ class TestAbalone(unittest.TestCase):
         self.assertTrue(AbaloneModel.get_edge_size(model5.field_size), model5.edge_size)
 
     def test_can_push_stone(self):
-        pass
+        model3.can_push_stone(0, 0, HexDescription.XM)
 
     def test_push_stone(self):
         pass
