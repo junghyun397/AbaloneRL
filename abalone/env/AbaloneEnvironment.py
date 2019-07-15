@@ -13,8 +13,8 @@ class AbaloneEnvironment(Environment):
                  abalone_agent: AbaloneModel.AbaloneAgent =
                  AbaloneModel.AbaloneAgent(edge_size=5,
                                            use_indexed_pos=True,
-                                           vector=FieldTemplate.get_basic_start(5))):
-        super().__init__(abalone_agent.field_size * 6)
+                                           vector_generator=FieldTemplate.get_basic_start)):
+        super().__init__(action_space=abalone_agent.field_size * 6)
         self.abalone_model = abalone_agent
 
     # Info Vector Index
@@ -36,7 +36,7 @@ class AbaloneEnvironment(Environment):
             if winner.value != self.abalone_model.game_vector[2]:
                 win = True
             end = True
-            self.abalone_model.reset(FieldTemplate.get_basic_start(self.abalone_model.edge_size))
+            self.abalone_model.reset()
 
         return self.abalone_model.game_vector, (success, drops, cut_out, win, end)
 

@@ -4,9 +4,9 @@ import numpy as np
 
 from abalone import AbaloneModel, FieldTemplate
 
-model3 = AbaloneModel.AbaloneAgent(edge_size=3, vector=FieldTemplate.get_basic_start(edge_size=3))
-model5 = AbaloneModel.AbaloneAgent(edge_size=5, vector=FieldTemplate.get_basic_start(edge_size=5))
-model10 = AbaloneModel.AbaloneAgent(edge_size=10, vector=FieldTemplate.get_basic_start(edge_size=10))
+model3 = AbaloneModel.AbaloneAgent(edge_size=3, vector_generator=FieldTemplate.get_basic_start)
+model5 = AbaloneModel.AbaloneAgent(edge_size=5, vector_generator=FieldTemplate.get_basic_start)
+model10 = AbaloneModel.AbaloneAgent(edge_size=10, vector_generator=FieldTemplate.get_basic_start)
 
 
 class TestAbaloneIO(unittest.TestCase):

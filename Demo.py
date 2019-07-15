@@ -13,8 +13,14 @@ if __name__ == '__main__':
     else:
         graphic = TextGraphic(base_vector=env.abalone_model.game_vector)
 
+    turns = 0
     while True:
+        turns += 1
         game_vector, info = env.action([random.randrange(0, env.action_space),
                                         random.randrange(0, env.action_space),
                                         random.randrange(0, env.action_space)])
+        _, _, _, _, end = info
+        if end:
+            graphic.update_vector(new_vector=env.abalone_model.game_vector)
         graphic.draw()
+        print(turns)

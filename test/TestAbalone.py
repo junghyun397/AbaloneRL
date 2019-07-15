@@ -5,8 +5,8 @@ import numpy as np
 from abalone import AbaloneModel
 from abalone.HexDescription import HexDescription
 
-model3 = AbaloneModel.AbaloneAgent(edge_size=3, use_indexed_pos=True)
-model5 = AbaloneModel.AbaloneAgent(edge_size=5, use_indexed_pos=True)
+model3 = AbaloneModel.AbaloneAgent(edge_size=3, vector_generator=AbaloneModel.new_vector, use_indexed_pos=True)
+model5 = AbaloneModel.AbaloneAgent(edge_size=5, vector_generator=AbaloneModel.new_vector, use_indexed_pos=True)
 
 # Convert Pos-Dimension resource
 model3_pos_list = [((0, 0), 0), ((1, 1), 4), ((3, 1), 12)]
@@ -69,10 +69,10 @@ class TestAbalone(unittest.TestCase):
         model3.can_push_stone(0, 0, HexDescription.XM)
 
     def test_push_stone(self):
-        pass
+        model3.try_push_stone(0, 0, HexDescription.XP)
 
     def test_out_stone(self):
-        pass
+        model3.try_push_stone(0, 0, HexDescription.XM)
 
     def test_end_game(self):
-        pass
+        model3.try_push_stone(0, 0, HexDescription.XP)

@@ -25,6 +25,9 @@ class Qt5GraphicWindowAdapter(QWidget):
         qr.moveCenter(QDesktopWidget().availableGeometry().center())
         self.move(qr.topLeft())
 
+    def draw(self) -> None:
+        pass
+
 
 class Qt5Graphic(GraphicModule):
 
@@ -33,12 +36,15 @@ class Qt5Graphic(GraphicModule):
 
         def run():
             app = QApplication(sys.argv)
-            self.q_window = Qt5GraphicWindowAdapter(1920, 1080)
+            q_window = Qt5GraphicWindowAdapter(1920, 1080)
             app.exec_()
 
         thread = threading.Thread(target=run)
         thread.daemon = True
         thread.start()
+
+    def get_click_interface(self) -> None:
+        pass
 
     def draw(self) -> None:
         pass

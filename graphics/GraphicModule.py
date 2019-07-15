@@ -14,4 +14,3 @@ class GraphicModule(metaclass=ABCMeta):
 
     def update_vector(self, new_vector: np.ndarray) -> None:
         self.base_vector = new_vector
-        self.draw()

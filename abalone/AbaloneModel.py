@@ -3,6 +3,7 @@ from typing import Callable, Tuple, Optional, Iterator
 
 import numpy as np
 
+from abalone import FieldTemplate
 from abalone.HexDescription import HexDescription
 from abalone.StoneColor import StoneColor
 
@@ -95,11 +96,13 @@ class AbaloneAgent:
     def __init__(self,
                  edge_size: int = 5,
                  vector: np.ndarray = None,
+                 vector_generator: Callable[[int], np.ndarray] = FieldTemplate.get_basic_start,
                  use_indexed_pos: bool = False):
         if vector is None:
-            vector = new_vector(edge_size)
+            vector = vector_generator(edge_size)
 
         self.edge_size = edge_size
+        self.vector_generator = vector_generator
         self.game_vector = vector
 
         self.field_size = get_field_size(edge_size)
@@ -121,7 +124,7 @@ class AbaloneAgent:
 
     def reset(self, vector: np.ndarray = None):
         if vector is None:
-            vector = new_vector(self.edge_size)
+            vector = self.vector_generator(self.edge_size)
         self.game_vector = vector
 
     def copy(self):
@@ -268,7 +271,6 @@ class AbaloneAgent:
     # Private
 
     def _flip_color(self) -> None:
-        if self.game_vector[2] == StoneColor.BLACK.value:
-            self.game_vector[2] = StoneColor.WHITE.value
-        else:
-            self.game_vector[2] = StoneColor.BLACK.value
+        self.game_vector[2] = StoneColor.WHITE\
+            .value if StoneColor.BLACK.value == self.game_vector[2] \
+            else StoneColor.BLACK.value
