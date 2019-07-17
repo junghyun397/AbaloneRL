@@ -7,6 +7,10 @@ from PyQt5.QtWidgets import QWidget, QApplication, QDesktopWidget
 from graphics.GraphicModule import GraphicModule
 
 
+class ThreadAdapter:
+    pass
+
+
 class Qt5GraphicWindowAdapter(QWidget):
 
     # noinspection PyArgumentList
@@ -25,7 +29,7 @@ class Qt5GraphicWindowAdapter(QWidget):
         qr.moveCenter(QDesktopWidget().availableGeometry().center())
         self.move(qr.topLeft())
 
-    def draw(self) -> None:
+    def draw(self, game_vector: np.ndarray) -> None:
         pass
 
 
@@ -33,15 +37,6 @@ class Qt5Graphic(GraphicModule):
 
     def __init__(self, base_vector: np.ndarray):
         super().__init__(base_vector)
-
-        def run():
-            app = QApplication(sys.argv)
-            q_window = Qt5GraphicWindowAdapter(1920, 1080)
-            app.exec_()
-
-        thread = threading.Thread(target=run)
-        thread.daemon = True
-        thread.start()
 
     def get_click_interface(self) -> None:
         pass

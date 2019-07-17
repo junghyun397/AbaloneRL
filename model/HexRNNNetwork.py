@@ -1,0 +1,3 @@
+
+class HexRNNNetwork:
+    pass

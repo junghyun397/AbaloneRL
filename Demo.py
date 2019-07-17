@@ -11,7 +11,7 @@ def random_policy(action_space: int) -> list:
             random.randrange(0, action_space)]
 
 
-graphic_mode = "TEXT"
+graphic_mode = "qt5"
 
 if __name__ == '__main__':
     env = AbaloneEnvironment()
@@ -20,11 +20,12 @@ if __name__ == '__main__':
     else:
         graphic = TextGraphic(base_vector=env.abalone_model.game_vector)
 
-    turns = 0
+    total_game = 0
     while True:
         _, info = env.action(random_policy(env.action_space))
         _, drops, _, _, end = info
-        turns += 1
+        total_game += 1
         if end:
-            graphic.update_vector(new_vector=env.abalone_model.game_vector)
             graphic.draw()
+            graphic.update_vector(new_vector=env.abalone_model.game_vector)
+            print("Total Games: ", total_game)
