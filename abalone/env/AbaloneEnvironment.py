@@ -4,6 +4,7 @@ import numpy as np
 
 from abalone import AbaloneModel, FieldTemplate
 from abalone.HexDescription import HexDescription
+from abalone.StoneColor import StoneColor
 from agent.Environment import Environment
 
 
@@ -23,17 +24,18 @@ class AbaloneEnvironment(Environment):
     def action(self, action: List[int]) -> (np.ndarray, Tuple[List[bool], List[int], int, bool, bool]):
         success = [False, False, False]
         drops = [0, 0, 0]
-        cut_out, end, win = 0, False, False
+        cut_out, end, win, c_move_stone = 0, False, False, 0
         for i in range(3):
             y, x, description = self.decode_action(action[i])
-            success[i], do_end, drops[i] = self.abalone_model.try_push_stone(y, x, description)
-            if do_end:
+            success[i], move_stone, drops[i] = self.abalone_model.try_push_stone(y, x, description)
+            c_move_stone += move_stone
+            if c_move_stone == self.abalone_model.role_vector[1]:
                 cut_out = i
                 break
 
         winner = self.abalone_model.next_turn()
         if winner is not None:
-            if winner.value != self.abalone_model.game_vector[2]:
+            if winner.value != self.abalone_model.game_vector[2] and winner != StoneColor.NONE:
                 win = True
             end = True
             self.abalone_model.reset()

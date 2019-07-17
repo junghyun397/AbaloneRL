@@ -81,12 +81,15 @@ def get_indexed_pos_method(edge_size: int) -> (Callable[[int, int], int], Callab
 # Field Generator
 
 def new_field(edge_size: int) -> np.ndarray:
-    return np.zeros((get_field_size(edge_size),), dtype=np.int8)
+    return np.zeros((get_field_size(edge_size),), dtype=np.uint16)
 
 
 def new_vector(edge_size: int) -> np.ndarray:
-    return np.array([edge_size] + [0] * (get_field_size(edge_size) + 4), dtype=np.int8)
+    return np.array([edge_size] + [0] * (get_field_size(edge_size) + 4), dtype=np.uint16)
 
+
+# Role Vector Index
+# 0 max_turns, :: 1 movable_stone_pre_turn  :: 2 dropped_stone_for_end_game
 
 # Game Vector Index
 # 0 edge_size :: 1 turns :: 2 current color :: 3 out_black :: 4 out_white :: 5~ filed ~
@@ -95,15 +98,17 @@ class AbaloneAgent:
 
     def __init__(self,
                  edge_size: int = 5,
-                 vector: np.ndarray = None,
+                 role_vector: tuple = (100, 3, 6),
+                 game_vector: np.ndarray = None,
                  vector_generator: Callable[[int], np.ndarray] = FieldTemplate.get_basic_start,
                  use_indexed_pos: bool = False):
-        if vector is None:
-            vector = vector_generator(edge_size)
+        if game_vector is None:
+            game_vector = vector_generator(edge_size)
 
         self.edge_size = edge_size
         self.vector_generator = vector_generator
-        self.game_vector = vector
+        self.role_vector = role_vector
+        self.game_vector = game_vector
 
         self.field_size = get_field_size(edge_size)
 
@@ -128,7 +133,8 @@ class AbaloneAgent:
         self.game_vector = vector
 
     def copy(self):
-        return AbaloneAgent(self.edge_size, np.copy(self.game_vector))
+        return AbaloneAgent(edge_size=self.edge_size, role_vector=self.role_vector,
+                            game_vector=np.copy(self.game_vector), vector_generator=self.vector_generator)
 
     def copy_vector(self) -> np.ndarray:
         return np.copy(self.game_vector)
@@ -159,21 +165,27 @@ class AbaloneAgent:
         self.current_move_stone = 0
         self.game_vector[1] += 1
         self._flip_color()
-        if self.game_vector[4] > 5:
+        if self.game_vector[4] >= self.role_vector[2]:
             return StoneColor.BLACK
-        elif self.game_vector[3] > 5:
+        elif self.game_vector[3] >= self.role_vector[2]:
             return StoneColor.WHITE
+        elif self.game_vector[1] >= self.role_vector[0]:
+            return StoneColor.NONE
         return None
 
     # Logic Filed Control
 
-    def try_push_stone(self, y: int, x: int, description: HexDescription) -> (bool, bool, int):
+    # canMove, moveStone, droppedType
+
+    def try_push_stone(self, y: int, x: int, description: HexDescription) -> (bool, int, int):
         line, move_stone, dropped = self.can_push_stone(y, x, description)
-        if line is None or move_stone + self.current_move_stone > 3:
+        if line is None or move_stone + self.current_move_stone > self.role_vector[2] or line[0] != self.game_vector[2]:
             return False, False, 0
         self.current_move_stone += move_stone
         self.push_stone(y, x, description, line)
-        return True, move_stone == 3, dropped
+        return True, move_stone, dropped
+
+    # line, pushAbleLength, dropped
 
     def can_push_stone(self, y: int, x: int, description: HexDescription) -> (Optional[list], int, int):
         line, move_stone = self.get_line(y, x, description), 0
@@ -196,12 +208,12 @@ class AbaloneAgent:
     def push_stone(self, y: int, x: int, description: HexDescription, line: list = None) -> None:
         if line is None:
             line = self.get_line(y, x, description)
-
-        if line[len(line) - 1] == StoneColor.BLACK.value:
+        pop = line.pop()
+        if pop == StoneColor.BLACK.value:
             self.game_vector[3] += 1
-        elif line[len(line) - 1] == StoneColor.WHITE.value:
+        elif pop == StoneColor.WHITE.value:
             self.game_vector[4] += 1
-        line = [0] + line.pop()
+        line = [0] + line
         self.set_line(y, x, description, line)
 
     # Bin Field Control
@@ -271,6 +283,5 @@ class AbaloneAgent:
     # Private
 
     def _flip_color(self) -> None:
-        self.game_vector[2] = StoneColor.WHITE\
-            .value if StoneColor.BLACK.value == self.game_vector[2] \
+        self.game_vector[2] = StoneColor.WHITE.value if StoneColor.BLACK.value == self.game_vector[2] \
             else StoneColor.BLACK.value

@@ -31,7 +31,7 @@ def load_text_board(info_vector: list, text_board: str) -> np.ndarray:
                                 [0 if i == "+" else
                                  (StoneColor.BLACK.value if i == "@" else
                                   (StoneColor.WHITE.value if i == "#" else None))
-                                 for i in itertools.chain(*text_board.split("\n")[::-1])])))
+                                 for i in itertools.chain(*text_board.split("\n")[::-1])])), dtype=np.uint16)
 
 
 def get_basic_start(edge_size: int) -> np.ndarray:
