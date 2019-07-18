@@ -6,26 +6,35 @@ from graphics.TextGraphic import TextGraphic
 
 
 def random_policy(action_space: int) -> list:
-    return [random.randrange(0, action_space),
-            random.randrange(0, action_space),
-            random.randrange(0, action_space)]
+    return [random.randrange(0, action_space), random.randrange(0, action_space), random.randrange(0, action_space)]
 
 
-graphic_mode = "qt5"
+def playable_trigger(bin_graphic, policy) -> None:
+    for i in range(3):
+        temp_input = input()
+        policy[i] = temp_input
+        bin_graphic.draw()
+
+
+player_mode = "RANDOM"
+graphic_mode = "TEXT"
 
 if __name__ == '__main__':
-    env = AbaloneEnvironment()
     if graphic_mode.lower() == "qt5":
-        graphic = Qt5Graphic(base_vector=env.abalone_model.game_vector)
+        graphic = Qt5Graphic()
     else:
-        graphic = TextGraphic(base_vector=env.abalone_model.game_vector)
+        graphic = TextGraphic()
 
+    trigger = (lambda: graphic.draw())
+
+    env = AbaloneEnvironment()
+    graphic.set_vector(env.abalone_model.game_vector)
     total_game = 0
     while True:
         _, info = env.action(random_policy(env.action_space))
         _, drops, _, _, end = info
         total_game += 1
         if end:
-            graphic.draw()
-            graphic.update_vector(new_vector=env.abalone_model.game_vector)
+            trigger()
+            graphic.set_vector(new_vector=env.abalone_model.game_vector)
             print("Total Games: ", total_game)

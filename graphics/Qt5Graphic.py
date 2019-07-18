@@ -1,8 +1,5 @@
-import sys
-import threading
-
 import numpy as np
-from PyQt5.QtWidgets import QWidget, QApplication, QDesktopWidget
+from PyQt5.QtWidgets import QWidget, QDesktopWidget
 
 from graphics.GraphicModule import GraphicModule
 
@@ -13,10 +10,10 @@ class ThreadAdapter:
 
 class Qt5GraphicWindowAdapter(QWidget):
 
-    # noinspection PyArgumentList
-    def __init__(self, width: int, height: int):
+    def __init__(self, edge_size: int, block_size: int = 100):
         super().__init__()
-        self.init_ui(width, height)
+        self.edge_size = edge_size
+        self.init_ui(edge_size * 2 * block_size, edge_size * 2 * block_size)
 
     def init_ui(self, width: int, height: int) -> None:
         self.resize(width, height)
@@ -35,8 +32,8 @@ class Qt5GraphicWindowAdapter(QWidget):
 
 class Qt5Graphic(GraphicModule):
 
-    def __init__(self, base_vector: np.ndarray):
-        super().__init__(base_vector)
+    def __init__(self):
+        super().__init__()
 
     def get_click_interface(self) -> None:
         pass

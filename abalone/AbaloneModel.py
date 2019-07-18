@@ -3,7 +3,6 @@ from typing import Callable, Tuple, Optional, Iterator
 
 import numpy as np
 
-from abalone import FieldTemplate
 from abalone.HexDescription import HexDescription
 from abalone.StoneColor import StoneColor
 
@@ -100,7 +99,7 @@ class AbaloneAgent:
                  edge_size: int = 5,
                  role_vector: tuple = (100, 3, 6),
                  game_vector: np.ndarray = None,
-                 vector_generator: Callable[[int], np.ndarray] = FieldTemplate.get_basic_start,
+                 vector_generator: Callable[[int], np.ndarray] = new_vector,
                  use_indexed_pos: bool = False):
         if game_vector is None:
             game_vector = vector_generator(edge_size)

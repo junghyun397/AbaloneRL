@@ -1,4 +1,4 @@
-from typing import Tuple, List
+from typing import Tuple, List, Callable
 
 import numpy as np
 
@@ -21,13 +21,16 @@ class AbaloneEnvironment(Environment):
     # Info Vector Index
     # success, drops, cut-put pos, is-win, is-end
 
-    def action(self, action: List[int]) -> (np.ndarray, Tuple[List[bool], List[int], int, bool, bool]):
+    def action(self, action: List[int],
+               trigger: Callable[[], None] =
+               (lambda: None)) -> (np.ndarray, Tuple[List[bool], List[int], int, bool, bool]):
         success = [False, False, False]
         drops = [0, 0, 0]
         cut_out, end, win, c_move_stone = 0, False, False, 0
         for i in range(3):
             y, x, description = self.decode_action(action[i])
             success[i], move_stone, drops[i] = self.abalone_model.try_push_stone(y, x, description)
+            trigger()
             c_move_stone += move_stone
             if c_move_stone == self.abalone_model.role_vector[1]:
                 cut_out = i

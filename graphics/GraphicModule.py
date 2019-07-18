@@ -5,12 +5,12 @@ import numpy as np
 
 class GraphicModule(metaclass=ABCMeta):
 
-    def __init__(self, base_vector: np.ndarray):
-        self.base_vector = base_vector
+    def __init__(self):
+        self.base_vector = None
 
     @abstractmethod
     def draw(self) -> None:
         pass
 
-    def update_vector(self, new_vector: np.ndarray) -> None:
+    def set_vector(self, new_vector: np.ndarray) -> None:
         self.base_vector = new_vector
