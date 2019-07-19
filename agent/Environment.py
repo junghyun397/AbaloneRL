@@ -1,5 +1,4 @@
 from abc import ABCMeta, abstractmethod
-from typing import Callable
 
 import numpy as np
 
@@ -11,7 +10,7 @@ class Environment(metaclass=ABCMeta):
         self.action_space = action_space
 
     @abstractmethod
-    def action(self, action: int, trigger: Callable[[], None] = (lambda: None)) -> (np.ndarray, bool):
+    def action(self, action: int) -> (np.ndarray, bool):
         pass
 
     @abstractmethod

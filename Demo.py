@@ -9,14 +9,6 @@ def random_policy(action_space: int) -> list:
     return [random.randrange(0, action_space), random.randrange(0, action_space), random.randrange(0, action_space)]
 
 
-def playable_trigger(bin_graphic, policy) -> None:
-    for i in range(3):
-        temp_input = input()
-        policy[i] = temp_input
-        bin_graphic.draw()
-
-
-player_mode = "RANDOM"
 graphic_mode = "TEXT"
 
 if __name__ == '__main__':
