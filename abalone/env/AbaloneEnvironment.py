@@ -21,7 +21,8 @@ class AbaloneEnvironment(Environment):
     # Info Vector Index
     # success, drops, cut-put pos, is-win, is-end
 
-    def action(self, action: List[int]) -> (np.ndarray, Tuple[List[bool], List[int], int, bool, bool]):
+    def action(self, action: List[int]) -> (List[np.ndarray], Tuple[List[bool], List[int], int, bool, bool]):
+        stats = [None, None, None]
         success = [False, False, False]
         drops = [0, 0, 0]
         cut_out, end, win, c_move_stone = 0, False, False, 0
@@ -29,6 +30,7 @@ class AbaloneEnvironment(Environment):
             y, x, description = self.decode_action(action[i])
             success[i], move_stone, drops[i] = self.abalone_model.try_push_stone(y, x, description)
             c_move_stone += move_stone
+            stats[i] = self.abalone_model.get_filed()
             if c_move_stone == self.abalone_model.role_vector[1]:
                 cut_out = i
                 break
@@ -40,7 +42,7 @@ class AbaloneEnvironment(Environment):
             end = True
             self.abalone_model.reset()
 
-        return self.abalone_model.game_vector, (success, drops, cut_out, win, end)
+        return stats, (success, drops, cut_out, win, end)
 
     def get_state(self) -> np.ndarray:
         return self.abalone_model.game_vector
