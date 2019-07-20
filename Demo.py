@@ -17,16 +17,15 @@ if __name__ == '__main__':
     else:
         graphic = TextGraphic()
 
-    trigger = (lambda: graphic.draw())
-
     env = AbaloneEnvironment()
     graphic.set_vector(env.abalone_model.game_vector)
-    total_game = 0
+    total_game, max_turns = 0, 0
     while True:
         _, info = env.action(random_policy(env.action_space))
         _, drops, _, _, end = info
-        total_game += 1
         if end:
-            trigger()
-            graphic.set_vector(new_vector=env.abalone_model.game_vector)
-            print("Total Games: ", total_game)
+            total_game += 1
+            if not total_game % 100:
+                graphic.draw()
+                print(total_game)
+                graphic.set_vector(new_vector=env.abalone_model.game_vector)

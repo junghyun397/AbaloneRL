@@ -10,5 +10,5 @@ class NeuralNetwork(metaclass=ABCMeta):
         pass
 
     @abstractmethod
-    def backward(self, x: np.ndarray, y: np.ndarray):
+    def backward(self, x: np.ndarray, y: np.ndarray) -> np.ndarray:
         pass

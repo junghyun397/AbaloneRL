@@ -1,15 +1,19 @@
 import numpy as np
+from PyQt5.QtCore import QThread, QRunnable
 from PyQt5.QtWidgets import QWidget, QDesktopWidget
 
 from graphics.GraphicModule import GraphicModule
 
 
-class ThreadAdapter:
-    pass
+class ThreadAdapter(QRunnable):
+
+    def run(self):
+        pass
 
 
 class Qt5GraphicWindowAdapter(QWidget):
 
+    # noinspection PyArgumentList
     def __init__(self, edge_size: int, block_size: int = 100):
         super().__init__()
         self.edge_size = edge_size

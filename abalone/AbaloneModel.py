@@ -77,6 +77,12 @@ def get_indexed_pos_method(edge_size: int) -> (Callable[[int, int], int], Callab
     return get_1d_pos, get_2d_pos
 
 
+def get_role_vector(max_turn: int = 1000,
+                    max_push_per_turn: int = 3,
+                    end_dropped_stone: int = 6):
+    return max_turn, max_push_per_turn, end_dropped_stone
+
+
 # Field Generator
 
 def new_field(edge_size: int) -> np.ndarray:
@@ -97,7 +103,7 @@ class AbaloneAgent:
 
     def __init__(self,
                  edge_size: int = 5,
-                 role_vector: tuple = (100, 3, 6),
+                 role_vector: tuple = get_role_vector(),
                  game_vector: np.ndarray = None,
                  vector_generator: Callable[[int], np.ndarray] = new_vector,
                  use_indexed_pos: bool = False):
@@ -174,7 +180,7 @@ class AbaloneAgent:
 
     # Logic Filed Control
 
-    # canMove, moveStone, droppedType
+    # can-move, moved, dropped
 
     def try_push_stone(self, y: int, x: int, description: HexDescription) -> (bool, int, int):
         line, move_stone, dropped = self.can_push_stone(y, x, description)
@@ -184,7 +190,7 @@ class AbaloneAgent:
         self.push_stone(y, x, description, line)
         return True, move_stone, dropped
 
-    # line, pushAbleLength, dropped
+    # optional::line, moved-length, dropped
 
     def can_push_stone(self, y: int, x: int, description: HexDescription) -> (Optional[list], int, int):
         line, move_stone = self.get_line(y, x, description), 0
@@ -278,6 +284,13 @@ class AbaloneAgent:
             return y < self.edge_size * 2 and self.edge_size + y > x > -1
         else:
             return y < self.edge_size * 2 and y - self.edge_size < x < self.edge_size * 2 - 1
+
+    def encode_action(self, y: int, x: int, description: HexDescription) -> int:
+        return self.get_1d_pos(y, x) * 6 + (description.value - 1)
+
+    def decode_action(self, action: int) -> (int, int, HexDescription):
+        y, x = self.get_2d_pos(action // 6)
+        return y, x, HexDescription(action % 6 + 1)
 
     # Private
 

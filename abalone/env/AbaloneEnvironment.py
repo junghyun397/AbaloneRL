@@ -1,9 +1,8 @@
-from typing import Tuple, List
+from typing import Tuple, List, Optional
 
 import numpy as np
 
 from abalone import AbaloneModel, FieldTemplate
-from abalone.HexDescription import HexDescription
 from abalone.StoneColor import StoneColor
 from agent.Environment import Environment
 
@@ -21,16 +20,16 @@ class AbaloneEnvironment(Environment):
     # Info Vector Index
     # success, drops, cut-put pos, is-win, is-end
 
-    def action(self, action: List[int]) -> (List[np.ndarray], Tuple[List[bool], List[int], int, bool, bool]):
+    def action(self, action: List[int]) -> (List[Optional[np.ndarray]], Tuple[List[bool], List[int], int, bool, bool]):
         stats = [None, None, None]
         success = [False, False, False]
         drops = [0, 0, 0]
         cut_out, end, win, c_move_stone = 0, False, False, 0
         for i in range(3):
-            y, x, description = self.decode_action(action[i])
+            y, x, description = self.abalone_model.decode_action(action[i])
             success[i], move_stone, drops[i] = self.abalone_model.try_push_stone(y, x, description)
             c_move_stone += move_stone
-            stats[i] = self.abalone_model.get_filed()
+            stats[i] = self.abalone_model.game_vector.copy()
             if c_move_stone == self.abalone_model.role_vector[1]:
                 cut_out = i
                 break
@@ -46,10 +45,3 @@ class AbaloneEnvironment(Environment):
 
     def get_state(self) -> np.ndarray:
         return self.abalone_model.game_vector
-
-    def encode_action(self, y: int, x: int, description: HexDescription) -> int:
-        return self.abalone_model.get_1d_pos(y, x) * 6 + (description.value - 1)
-
-    def decode_action(self, action: int) -> (int, int, HexDescription):
-        y, x = self.abalone_model.get_2d_pos(action // 6)
-        return y, x, HexDescription(action % 6 + 1)
