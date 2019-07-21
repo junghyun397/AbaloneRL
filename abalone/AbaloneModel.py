@@ -180,7 +180,7 @@ class AbaloneAgent:
 
     # Logic Filed Control
 
-    # can-move, moved, dropped
+    # fail-move, moved, dropped
 
     def try_push_stone(self, y: int, x: int, description: HexDescription) -> (bool, int, int):
         line, move_stone, dropped = self.can_push_stone(y, x, description)

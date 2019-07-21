@@ -9,7 +9,7 @@ class HexConv2D(tf.keras.layers):
         super(HexConv2D, self).__init__()
         self.num_outputs = num_outputs
         self.edge_size = AbaloneModel.get_edge_size(num_outputs)
-        self.get_1d_pos = AbaloneModel.get_pos_method(edge_size=self.edge_size)
+        self.get_1d_pos, self.get_2d_pos = AbaloneModel.get_pos_method(edge_size=self.edge_size)
 
     def build(self, input_shape):
         self.kernels = None
