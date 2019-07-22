@@ -3,7 +3,7 @@ import numpy as np
 from agent.NeuralNetwork import NeuralNetwork
 
 
-class HexRNNNetwork(NeuralNetwork):
+class HexRNNetwork(NeuralNetwork):
 
     def __init__(self):
         super().__init__()
