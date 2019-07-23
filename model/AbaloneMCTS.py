@@ -30,7 +30,9 @@ class AbaloneMCTS:
         merged_vec = dict()
         for act in range(self.agent.field_size):
             self.t_agent.set_game_vector(state[0].copy())
-            success, moved, _ = self.t_agent.try_push_stone(*self.agent.decode_action(act))
-            if success and state[1] + moved <= 3:
+            success, moved, _ = self.t_agent.can_push_stone(*self.agent.decode_action(act))
+            if success is not None and state[1] + moved <= 3:
+                self.t_agent.set_game_vector(state[0].copy())
+                self.t_agent.push_stone(*self.agent.decode_action(act))
                 merged_vec[act] = self.t_agent.game_vector, state[1] + moved
         return None if len(merged_vec) == 0 else merged_vec

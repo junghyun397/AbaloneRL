@@ -122,14 +122,9 @@ class AbaloneAgent:
         else:
             self.get_1d_pos, self.get_2d_pos = get_pos_method(edge_size)
 
-        self.current_move_stone = 0
-        self.current_out_black = 0
-        self.current_out_white = 0
-
     # Bin Data
 
     def set_game_vector(self, vector: np.ndarray) -> None:
-        self.current_move_stone, self.current_out_black, self.current_out_white = 0, 0, 0
         self.game_vector = vector
 
     def reset(self, vector: np.ndarray = None):
@@ -167,7 +162,6 @@ class AbaloneAgent:
     # Game Control
 
     def next_turn(self) -> Optional[StoneColor]:
-        self.current_move_stone = 0
         self.game_vector[1] += 1
         self._flip_color()
         if self.game_vector[4] >= self.role_vector[2]:
@@ -180,13 +174,12 @@ class AbaloneAgent:
 
     # Logic Filed Control
 
-    # fail-move, moved, dropped
+    # fail-move, moved-length, dropped
 
     def try_push_stone(self, y: int, x: int, description: HexDescription) -> (bool, int, int):
         line, move_stone, dropped = self.can_push_stone(y, x, description)
-        if line is None or move_stone + self.current_move_stone > self.role_vector[2] or line[0] != self.game_vector[2]:
+        if line is None or line[0] != self.game_vector[2]:
             return False, False, 0
-        self.current_move_stone += move_stone
         self.push_stone(y, x, description, line)
         return True, move_stone, dropped
 
