@@ -1,4 +1,4 @@
-from typing import Optional, List, Tuple, Dict
+from typing import Optional, List, Tuple, Dict, Iterator
 
 import numpy as np
 
@@ -17,22 +17,20 @@ class AbaloneMCTS:
         self.pruning_policy = pruning_policy
 
     def process_episode(self, state_vector: np.ndarray) -> List[float]:
-        pass
+        t_tree = dict()
+        n_tree = dict()
+        return [0, 0, 0]
 
     def process_turn(self, state_vector: np.ndarray) -> None:
-        merged = self.find_next_move((state_vector, 0))
-        if merged is not None:
-            for state, act in merged:
-                self.process_turn(state)
+        for n_vector, moved in self.find_next_move((state_vector, 0)):
+            if self.pruning_policy.prediction(n_vector) > .5:
+                self.process_turn(state_vector)
 
-    def find_next_move(self, state: Tuple[np.ndarray, int]) -> Optional[Dict[Tuple[np.ndarray, int]]]:
-        self.t_agent.set_game_vector(state[0])
-        merged_vec = dict()
+    def find_next_move(self, state: Tuple[np.ndarray, int]) -> Iterator[Tuple[np.ndarray, int]]:
         for act in range(self.agent.field_size):
             self.t_agent.set_game_vector(state[0].copy())
             success, moved, _ = self.t_agent.can_push_stone(*self.agent.decode_action(act))
             if success is not None and state[1] + moved <= 3:
                 self.t_agent.set_game_vector(state[0].copy())
                 self.t_agent.push_stone(*self.agent.decode_action(act))
-                merged_vec[act] = self.t_agent.game_vector, state[1] + moved
-        return None if len(merged_vec) == 0 else merged_vec
+                yield self.t_agent.game_vector, state[1] + moved

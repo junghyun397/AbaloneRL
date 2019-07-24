@@ -1,4 +1,5 @@
 import itertools
+import random
 from functools import partial
 from operator import is_not
 
@@ -47,4 +48,12 @@ def get_basic_start(edge_size: int) -> np.ndarray:
     game_vector.put([edge_size * 2 + 8] + np.arange(edge_size - 2), StoneColor.BLACK.value)
     game_vector.put([game_vector.size - 1] - np.arange(edge_size * 2 + 1), StoneColor.WHITE.value)
     game_vector.put([game_vector.size - edge_size * 2 - 4] - np.arange(edge_size - 2), StoneColor.WHITE.value)
+    return game_vector
+
+
+def get_random_filled_start(edge_size: int, fill_ratio: float = .5) -> np.ndarray:
+    game_vector = AbaloneModel.new_vector(edge_size)
+    for idx in range(game_vector.size - 5):
+        if random.random() < fill_ratio:
+            game_vector[5 + idx] = StoneColor.BLACK.value if random.random() < .5 else StoneColor.WHITE.value
     return game_vector
