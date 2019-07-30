@@ -12,13 +12,11 @@ def random_policy(action_space: int) -> list:
 graphic_mode = "TEXT"
 
 if __name__ == '__main__':
-    if graphic_mode.lower() == "qt5":
-        graphic = Qt5Graphic()
-    else:
-        graphic = TextGraphic()
-
     env = AbaloneEnvironment()
-    graphic.set_vector(env.abalone_model.game_vector)
+    if graphic_mode.lower() == "qt5":
+        graphic = Qt5Graphic(env.abalone_model.game_vector)
+    else:
+        graphic = TextGraphic(env.abalone_model.game_vector)
     total_game, max_turns = 0, 0
     while True:
         _, info = env.action(random_policy(env.action_space))

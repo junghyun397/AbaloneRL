@@ -22,11 +22,11 @@ class AbaloneMCTS:
         return [0, 0, 0]
 
     def process_turn(self, state_vector: np.ndarray) -> None:
-        for n_vector, moved in self.find_next_move((state_vector, 0)):
-            if self.pruning_policy.prediction(n_vector) > .5:
-                self.process_turn(state_vector)
+        for n_vector, moved in self.find_possible_move((state_vector, 0)):
+            if moved > 2:
+                self.find_possible_move((n_vector, moved))
 
-    def find_next_move(self, state: Tuple[np.ndarray, int]) -> Iterator[Tuple[np.ndarray, int]]:
+    def find_possible_move(self, state: Tuple[np.ndarray, int]) -> Iterator[Tuple[np.ndarray, int]]:
         for act in range(self.agent.field_size):
             self.t_agent.set_game_vector(state[0].copy())
             success, moved, _ = self.t_agent.can_push_stone(*self.agent.decode_action(act))

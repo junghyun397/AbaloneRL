@@ -5,8 +5,8 @@ import numpy as np
 
 class GraphicModule(metaclass=ABCMeta):
 
-    def __init__(self):
-        self.base_vector = None
+    def __init__(self, base_vector: np.ndarray) -> None:
+        self.base_vector = base_vector
 
     @abstractmethod
     def draw(self) -> None:
