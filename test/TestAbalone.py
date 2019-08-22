@@ -5,8 +5,8 @@ import numpy as np
 from abalone import AbaloneModel
 from abalone.HexDescription import HexDescription
 
-model3 = AbaloneModel.AbaloneAgent(edge_size=3, vector_generator=AbaloneModel.new_vector, use_indexed_pos=True)
-model5 = AbaloneModel.AbaloneAgent(edge_size=5, vector_generator=AbaloneModel.new_vector, use_indexed_pos=True)
+model3 = AbaloneModel.AbaloneAgent(edge_size=3, vector_generator=AbaloneModel.new_vector)
+model5 = AbaloneModel.AbaloneAgent(edge_size=5, vector_generator=AbaloneModel.new_vector)
 
 # Convert Pos-Dimension resource
 model3_pos_list = [((0, 0), 0), ((1, 1), 4), ((3, 1), 12)]
@@ -22,11 +22,11 @@ model5_validation_pos = [((0, 0), True), ((2, 6), True), ((4, 8), True), ((5, 8)
 class TestAbalone(unittest.TestCase):
 
     def test_pos_generator(self):
-        for index, y, x in AbaloneModel.pos_generator(3):
+        for index, y, x in AbaloneModel.pos_iterator(3):
             self.assertTrue(index < AbaloneModel.get_field_size(3))
             self.assertEqual(model3.get_1d_pos(y, x), index)
 
-        for index, y, x in AbaloneModel.pos_generator(5):
+        for index, y, x in AbaloneModel.pos_iterator(5):
             self.assertTrue(index < AbaloneModel.get_field_size(5))
             self.assertEqual(model5.get_1d_pos(y, x), index)
 
@@ -58,8 +58,8 @@ class TestAbalone(unittest.TestCase):
             self.assertEqual(model5.check_valid_pos(*n[0]), n[1])
 
     def test_to_vector(self):
-        self.assertTrue(np.array_equal(model3.game_vector, np.array([3] + [0] * (model3.field_size + 4), dtype=np.int8)))
-        self.assertTrue(np.array_equal(model5.game_vector, np.array([5] + [0] * (model5.field_size + 4), dtype=np.int8)))
+        self.assertTrue(np.array_equal(model3.game_vector, np.array([3] + [0]*(model3.field_size + 4), dtype=np.int8)))
+        self.assertTrue(np.array_equal(model5.game_vector, np.array([5] + [0]*(model5.field_size + 4), dtype=np.int8)))
 
     def field_size_2_edge_size(self):
         self.assertTrue(AbaloneModel.get_edge_size(model3.field_size), model3.edge_size)

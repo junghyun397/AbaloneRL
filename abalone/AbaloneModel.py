@@ -19,7 +19,7 @@ def get_edge_size(field_size: int) -> int:
 
 # Indexed-Pos Generator
 
-def pos_generator(edge_size: int) -> Iterator[Tuple[int, int, int]]:
+def pos_iterator(edge_size: int) -> Iterator[Tuple[int, int, int]]:
     index, y, x = 0, 0, 0
     edge_cut, shift_x = edge_size, 0
     while index < get_field_size(edge_size):
@@ -39,14 +39,14 @@ _indexed_pos = dict()
 
 def _create_indexed_pos(edge_size: int) -> None:
     _indexed_pos[edge_size] = dict()
-    for index, y, x in pos_generator(edge_size):
+    for index, y, x in pos_iterator(edge_size):
         _indexed_pos[edge_size][index] = y, x
         _indexed_pos[edge_size][y, x] = index
 
 
 # Pos Generator
 
-def get_pos_method(edge_size: int) -> (Callable[[int, int], int], Callable[[int], Tuple[int, int]]):
+def build_pos_method(edge_size: int) -> (Callable[[int, int], int], Callable[[int], Tuple[int, int]]):
     def get_1d_pos(y: int, x: int) -> int:
         if y < edge_size:
             return int(((y + edge_size - 1) * (y + edge_size) - (edge_size - 1) * edge_size) / 2 + x)
@@ -62,7 +62,7 @@ def get_pos_method(edge_size: int) -> (Callable[[int, int], int], Callable[[int]
     return get_1d_pos, get_2d_pos
 
 
-def get_indexed_pos_method(edge_size: int) -> (Callable[[int, int], int], Callable[[int], Tuple[int, int]]):
+def build_indexed_pos_method(edge_size: int) -> (Callable[[int, int], int], Callable[[int], Tuple[int, int]]):
     if _indexed_pos.get(edge_size) is None:
         _create_indexed_pos(edge_size)
 
@@ -77,20 +77,29 @@ def get_indexed_pos_method(edge_size: int) -> (Callable[[int, int], int], Callab
     return get_1d_pos, get_2d_pos
 
 
-def get_role_vector(max_turn: int = 1000,
-                    max_push_per_turn: int = 3,
-                    end_dropped_stone: int = 6):
+def build_role_vector(max_turn: int = 1000,
+                      max_push_per_turn: int = 3,
+                      end_dropped_stone: int = 6):
     return max_turn, max_push_per_turn, end_dropped_stone
 
 
-# Field Generator
+# Vector Generator
 
 def new_field(edge_size: int) -> np.ndarray:
-    return np.zeros((get_field_size(edge_size),), dtype=np.uint16)
+    return np.zeros((get_field_size(edge_size),), dtype=np.uint8)
 
 
 def new_vector(edge_size: int) -> np.ndarray:
-    return np.array([edge_size] + [0] * (get_field_size(edge_size) + 4), dtype=np.uint16)
+    return np.array([edge_size] + [0] * (get_field_size(edge_size) + 4), dtype=np.uint8)
+
+
+def build_game_vector(edge_size: int,
+                 turns: int,
+                 current_color: int,
+                 out_black: int,
+                 out_white: int,
+                 filed: np.ndarray):
+    return np.array([edge_size, turns, current_color, out_black, out_white] + filed, dtype=np.uint8)
 
 
 # Role Vector Index
@@ -103,10 +112,10 @@ class AbaloneAgent:
 
     def __init__(self,
                  edge_size: int = 5,
-                 role_vector: tuple = get_role_vector(),
+                 role_vector: tuple = build_role_vector(),
                  game_vector: np.ndarray = None,
                  vector_generator: Callable[[int], np.ndarray] = new_vector,
-                 use_indexed_pos: bool = False):
+                 use_indexed_pos: bool = True):
         if game_vector is None:
             game_vector = vector_generator(edge_size)
 
@@ -118,9 +127,9 @@ class AbaloneAgent:
         self.field_size = get_field_size(edge_size)
 
         if use_indexed_pos:
-            self.get_1d_pos, self.get_2d_pos = get_indexed_pos_method(edge_size)
+            self.get_1d_pos, self.get_2d_pos = build_indexed_pos_method(edge_size)
         else:
-            self.get_1d_pos, self.get_2d_pos = get_pos_method(edge_size)
+            self.get_1d_pos, self.get_2d_pos = build_pos_method(edge_size)
 
     # Bin Data
 
@@ -188,7 +197,7 @@ class AbaloneAgent:
     def can_push_stone(self, y: int, x: int, description: HexDescription) -> (Optional[list], int, int):
         line, move_stone = self.get_line(y, x, description), 0
         if len(line) == 1:
-            return None, 1, -1
+            return None, 0, 0
 
         lm, om, flp = 0, 0, False
         for n in line:

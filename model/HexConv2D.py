@@ -4,19 +4,28 @@ import tensorflow as tf
 from abalone import AbaloneModel
 
 
-class HexConv2D(tf.keras.layers):
+def hex_conv_2d(nOutputPlane, kW, kH, dW=1, dH=1, padding="VALID", bias=True, reuse=False,
+                name="AbaloneHexConv2D"):
+    def hex_conv_2d_layer(x, is_training=True):
+        edge_size = AbaloneModel.get_edge_size(x.get_shape()[3])
+        n_input_plane = x.get_shape().as_list()[3]
+        with tf.variable_scope(name, None, [x], reuse=reuse):
+            w = tf.get_variable('weight', [kH, kW, n_input_plane, nOutputPlane],
+                            initializer=tf.initializers.tables_initializer)
+            b = None
 
-    def __init__(self, num_outputs, kernel_size: int = 3):
-        super(HexConv2D, self).__init__()
-        self.num_outputs = num_outputs
-        self.kernel_size = AbaloneModel.get_field_size(kernel_size)
-        self.get_1d_pos, self.get_2d_pos = None, None
+    return hex_conv_2d_layer
 
-    # noinspection PyAttributeOutsideInit
-    def build(self, input_shape):
-        self.edge_size = AbaloneModel.get_edge_size(field_size=input_shape)
-        self.get_1d_pos, self.get_2d_pos = AbaloneModel.get_pos_method(edge_size=self.edge_size)
-        self.kernels = np.array([[0] for _ in range(29)], dtype=np.uint16)
 
-    def call(self, inputs):
-        return inputs * self.kernels
+def hex_max_pooling_2d():
+    def hex_max_pooling_2d_layer(x, is_training=True):
+        pass
+
+    return hex_max_pooling_2d_layer
+
+
+def hex_avg_pooling_2d():
+    def hex_avg_pooling_2d_layer(x, is_training=True):
+        pass
+
+    return hex_avg_pooling_2d_layer

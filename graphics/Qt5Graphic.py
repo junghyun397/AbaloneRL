@@ -4,6 +4,7 @@ import numpy as np
 from PyQt5.QtCore import QRunnable, QEvent
 from PyQt5.QtWidgets import QDesktopWidget, QMainWindow, QWidget
 
+from abalone import AbaloneModel
 from abalone.HexDescription import HexDescription
 from graphics.GraphicModule import GraphicModule
 
@@ -30,16 +31,22 @@ class Qt5GraphicWindowAgent(QMainWindow):
         self.resize(width, height)
         self.setCentralWidget(QWidget(flags=0))
         self.center()
+
         self.setWindowTitle("AbaloneRL PyQt5 User Interface")
+        self.build_layout()
+
         self.show()
-        self.clear()
 
     def center(self) -> None:
         qr = self.frameGeometry()
         qr.moveCenter(QDesktopWidget().availableGeometry().center())
         self.move(qr.topLeft())
 
-    def draw(self, game_vector: np.ndarray) -> None:
+    def build_layout(self) -> None:
+        for y, x in AbaloneModel.pos_iterator(self.edge_size):
+            pass
+
+    def update_board(self, game_vector: np.ndarray) -> None:
         self._clear_cell()
         self._draw_guid_line()
         self._draw_cell(game_vector)
@@ -72,21 +79,26 @@ class ThreadAdapter(QRunnable):
         self.run()
 
     def run(self):
-        pass
+        while True:
+            pass
 
 
 class Qt5Graphic(GraphicModule):
 
     def __init__(self, base_vector: np.ndarray,
-                 event_handler: Callable[[int, int, HexDescription], bool] = (lambda: False)):
+                 use_click_interface: bool = False,
+                 event_handler: Callable[[int, int, HexDescription], bool] = (lambda _, __, ___: False)):
         super().__init__(base_vector)
         self.event_handler = event_handler
+        self.n_agent = AbaloneModel.AbaloneAgent(base_vector[0])
+        if not use_click_interface:
+            self.process_event = (lambda _, __: True)
         self.runner = ThreadAdapter(Qt5GraphicWindowAgent(base_vector[0], self.process_event))
         self.runner.run()
 
     def process_event(self, qEvent: QEvent) -> bool:
-        x, y, des = 0, 0, HexDescription.XM
+        x, y, des = self.n_agent.decode_action(0)
         return self.event_handler(x, y, des)
 
     def draw(self) -> None:
-        self.runner.window.draw(self.base_vector)
+        self.runner.window.update_board(self.base_vector)

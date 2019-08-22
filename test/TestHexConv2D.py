@@ -1,5 +1,11 @@
 import unittest
 
+from abalone import FieldTemplate, AbaloneModel
+
+model3 = AbaloneModel.AbaloneAgent(edge_size=3, vector_generator=FieldTemplate.get_basic_start)
+model5 = AbaloneModel.AbaloneAgent(edge_size=5, vector_generator=FieldTemplate.get_basic_start)
+model10 = AbaloneModel.AbaloneAgent(edge_size=10, vector_generator=FieldTemplate.get_basic_start)
+
 
 class TestHexConv2D(unittest.TestCase):
 
