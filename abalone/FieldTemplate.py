@@ -35,7 +35,7 @@ def load_text_board(info_vector: list, text_board: str) -> np.ndarray:
                                  for i in itertools.chain(*text_board.split("\n")[::-1])])), dtype=np.uint16)
 
 
-def get_basic_start(edge_size: int) -> np.ndarray:
+def basic_start(edge_size: int) -> np.ndarray:
     game_vector = AbaloneModel.new_vector(edge_size)
     if edge_size < 5:
         game_vector.put([5] + np.arange(edge_size), StoneColor.BLACK.value)
@@ -51,7 +51,7 @@ def get_basic_start(edge_size: int) -> np.ndarray:
     return game_vector
 
 
-def get_random_filled_start(edge_size: int, fill_ratio: float = .5) -> np.ndarray:
+def random_filled_start(edge_size: int, fill_ratio: float = .5) -> np.ndarray:
     game_vector = AbaloneModel.new_vector(edge_size)
     for idx in range(game_vector.size - 5):
         if random.random() < fill_ratio:

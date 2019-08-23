@@ -13,7 +13,7 @@ class AbaloneEnvironment(Environment):
                  abalone_agent: AbaloneModel.AbaloneAgent =
                  AbaloneModel.AbaloneAgent(edge_size=5,
                                            use_indexed_pos=True,
-                                           vector_generator=FieldTemplate.get_basic_start)):
+                                           vector_generator=FieldTemplate.basic_start)):
         super().__init__(action_space=abalone_agent.field_size * 6)
         self.abalone_model = abalone_agent
 
