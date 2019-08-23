@@ -110,12 +110,11 @@ def build_game_vector(edge_size: int,
 
 class AbaloneAgent:
 
-    def __init__(self,
-                 edge_size: int = 5,
+    def __init__(self, edge_size: int = 5,
                  role_vector: tuple = build_role_vector(),
-                 game_vector: np.ndarray = None,
                  vector_generator: Callable[[int], np.ndarray] = new_vector,
-                 use_indexed_pos: bool = True):
+                 use_indexed_pos: bool = True,
+                 game_vector: np.ndarray = None):
         if game_vector is None:
             game_vector = vector_generator(edge_size)
 
@@ -299,3 +298,124 @@ class AbaloneAgent:
     def _flip_color(self) -> None:
         self.game_vector[2] = StoneColor.WHITE.value if StoneColor.BLACK.value == self.game_vector[2] \
             else StoneColor.BLACK.value
+
+
+# noinspection PyMethodOverriding
+class StaticAbaloneAgent(AbaloneAgent):
+
+    def __init__(self, edge_size: int = 5,
+                 role_vector: tuple = build_role_vector(),
+                 vector_generator: Callable[[int], np.ndarray] = new_vector,
+                 use_indexed_pos: bool = True):
+        super().__init__(edge_size, role_vector, vector_generator, use_indexed_pos, np.array([0]))
+
+    # Game Control
+
+    def next_turn(self, game_vector: np.ndarray) -> Optional[StoneColor]:
+        game_vector[1] += 1
+        self._flip_color()
+        if game_vector[4] >= self.role_vector[2]:
+            return StoneColor.BLACK
+        elif game_vector[3] >= self.role_vector[2]:
+            return StoneColor.WHITE
+        elif game_vector[1] >= self.role_vector[0]:
+            return StoneColor.NONE
+        return None
+
+    # Logic Filed Control
+
+    # fail-move, moved-length, dropped
+
+    def try_push_stone(self, game_vector: np.ndarray, y: int, x: int, description: HexDescription) -> (bool, int, int):
+        line, move_stone, dropped = self.can_push_stone(game_vector, y, x, description)
+        if line is None or line[0] != game_vector[2]:
+            return False, False, 0
+        self.push_stone(game_vector, y, x, description, line)
+        return True, move_stone, dropped
+
+    # optional::line, moved-length, dropped
+
+    def can_push_stone(self, game_vector: np.ndarray, y: int, x: int, description: HexDescription) -> (Optional[list], int, int):
+        line, move_stone = self.get_line(game_vector, y, x, description), 0
+        if len(line) == 1:
+            return None, 0, 0
+
+        lm, om, flp = 0, 0, False
+        for n in line:
+            if n == StoneColor.NONE.value:
+                return line if 4 > lm > om else None, lm, 0
+            elif n == self.game_vector[2]:
+                if flp:
+                    return None, 0, 0
+                lm += 1
+            else:
+                flp = True
+                om += 1
+        return line if 4 > lm > om else None, lm, 1
+
+    def push_stone(self, game_vector: np.ndarray, y: int, x: int, description: HexDescription, line: list = None) -> None:
+        if line is None:
+            line = self.get_line(game_vector, y, x, description)
+        pop = line.pop()
+        if pop == StoneColor.BLACK.value:
+            game_vector[3] += 1
+        elif pop == StoneColor.WHITE.value:
+            game_vector[4] += 1
+        line = [0] + line
+        self.set_line(game_vector, y, x, description, line)
+
+    # Bin Field Control
+
+    def get_line(self, game_vector: np.ndarray, y: int, x: int, description: HexDescription) -> list:
+        if description == HexDescription.XP:
+            if y < self.edge_size:
+                return [game_vector[5 + self.get_1d_pos(y, xp)] for xp in range(x, self.edge_size + y)]
+            else:
+                return [game_vector[5 + self.get_1d_pos(y, xp)] for xp in range(x, self.edge_size - 1)]
+        elif description == HexDescription.XM:
+            if y < self.edge_size:
+                return [game_vector[5 + self.get_1d_pos(y, x - xp)] for xp in range(0, x + 1)]
+            else:
+                return [game_vector[5 + self.get_1d_pos(y, x - xp)] for xp in range(0, x - y + self.edge_size)]
+        elif description == HexDescription.YP:
+            if x < self.edge_size:
+                return [game_vector[5 + self.get_1d_pos(yp, x)] for yp in range(y, self.edge_size + x)]
+            else:
+                return [game_vector[5 + self.get_1d_pos(yp, x)] for yp in range(y, self.edge_size * 2 - 1)]
+        elif description == HexDescription.YM:
+            if x < self.edge_size:
+                return [game_vector[5 + self.get_1d_pos(y - yp, x)] for yp in range(0, y + 1)]
+            else:
+                return [game_vector[5 + self.get_1d_pos(y - yp, x)] for yp in range(0, y - x + self.edge_size)]
+        elif description == HexDescription.ZP:
+            return [game_vector[5 + self.get_1d_pos(yp, xp)] for yp, xp in
+                    zip(range(y, self.edge_size * 2 - 1), range(x, self.edge_size * 2 - 1))]
+        elif description == HexDescription.ZM:
+            return [game_vector[5 + self.get_1d_pos(y - yp, x - xp)] for yp, xp in
+                    zip(range(0, y), range(0, x))]
+
+    def set_line(self, game_vector: np.ndarray, y: int, x: int, description: HexDescription, line: list) -> None:
+        if description == HexDescription.XP:
+            for index in range(len(line)):
+                game_vector[5 + self.get_1d_pos(y, x + index)] = line[index]
+        elif description == HexDescription.XM:
+            for index in range(len(line)):
+                game_vector[5 + self.get_1d_pos(y, x - index)] = line[index]
+        elif description == HexDescription.YP:
+            for index in range(len(line)):
+                game_vector[5 + self.get_1d_pos(y + index, x)] = line[index]
+        elif description == HexDescription.YM:
+            for index in range(len(line)):
+                game_vector[5 + self.get_1d_pos(y - index, x)] = line[index]
+        elif description == HexDescription.ZP:
+            for index in range(len(line)):
+                game_vector[5 + self.get_1d_pos(y + index, x + index)] = line[index]
+        elif description == HexDescription.ZM:
+            for index in range(len(line)):
+                game_vector[5 + self.get_1d_pos(y - index, x - index)] = line[index]
+
+    def set_field_stone(self, game_vector: np.ndarray, y: int, x: int, color: StoneColor) -> None:
+        game_vector[5 + self.get_1d_pos(y, x)] = color.value
+
+    def get_field_stone(self, game_vector: np.ndarray, y: int, x: int) -> int:
+        return game_vector[5 + self.get_1d_pos(y, x)]

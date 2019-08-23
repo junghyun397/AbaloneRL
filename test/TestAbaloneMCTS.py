@@ -10,7 +10,7 @@ pruning_policy = RandomPruningPolicy()
 mcts = AbaloneMCTS(abalone_agent=model5, pruning_policy=pruning_policy)
 
 
-class TestAbalone(unittest.TestCase):
+class TestAbaloneMCTS(unittest.TestCase):
 
     def test_process_turn(self):
         pass
