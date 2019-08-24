@@ -119,13 +119,10 @@ class AbaloneAgent:
                  vector_generator: Callable[[int], np.ndarray] = new_vector,
                  use_indexed_pos: bool = True,
                  game_vector: np.ndarray = None):
-        if game_vector is None:
-            game_vector = vector_generator(edge_size)
-
         self.edge_size = edge_size
         self.vector_generator = vector_generator
         self.role_vector = role_vector
-        self.game_vector = game_vector
+        self.game_vector = game_vector if game_vector is not None else vector_generator(edge_size)
 
         self.field_size = get_field_size(edge_size)
 
