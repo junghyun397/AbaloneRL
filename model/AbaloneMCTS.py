@@ -1,29 +1,13 @@
+import copy
+
 import numpy as np
 
 from abalone import AbaloneModel
 from agent.PruningPolicy import PruningPolicy
 
 
-class Node:
-
-    def __init__(self, parent):
-        self._parent = parent
-        self._child = dict()
-
-    def expand(self):
-        pass
-
-    def select(self):
-        pass
-
-    def update(self):
-        pass
-
-    def update_all(self):
-        pass
-
-    def calculate(self):
-        pass
+def prob_array(x: np.ndarray) -> np.ndarray:
+    return x / x.sum(axis=0)
 
 
 class AbaloneMCTS:
@@ -32,14 +16,18 @@ class AbaloneMCTS:
                  abalone_agent: AbaloneModel.AbaloneAgent,
                  pruning_policy: PruningPolicy,
                  max_depth: int = 100):
-        self.agent = abalone_agent
+        self.agent = copy.deepcopy(abalone_agent)
         self.pruning_policy = pruning_policy
-
         self._max_depth = max_depth
-        self._root = Node(None)
 
-    def get_action_scores(self, game_vector: np.ndarray):
-        pass
+        self.agent.set_game_vector(np.array([0]))
 
-    def _next(self, game_vector: np.ndarray):
+    def get_action_prob(self, game_vector: np.ndarray) -> np.ndarray:
+        nodes = list()
+        action_count = AbaloneModel.get_action_size(game_vector.size)
+        for action in range(action_count):
+            nodes.append(self.search(game_vector.copy()))
+        return prob_array(nodes)
+
+    def search(self, game_vector: np.ndarray):
         pass
