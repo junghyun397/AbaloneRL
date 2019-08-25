@@ -13,10 +13,10 @@ mcts = AbaloneMCTS(abalone_agent=model5, pruning_policy=pruning_policy)
 class TestAbaloneMCTS(unittest.TestCase):
 
     def test_process_turn(self):
-        pass
+        mcts.process_game(model5.game_vector)
 
     def test_find_with_random_policy(self):
-        pass
+        mcts.process_game(model5.game_vector)
 
     def test_find_with_unlimited_depth(self):
-        pass
+        mcts.process_game(model5.game_vector)
