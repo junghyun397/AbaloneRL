@@ -1,22 +1,21 @@
 import copy
-from typing import Dict
+from typing import Dict, List
 
 import numpy as np
 
 from abalone import AbaloneModel
-from abalone.StoneColor import StoneColor
 from agent.PruningPolicy import PruningPolicy
 
 
-def prob_array(x: Dict[int, float]) -> Dict[int, float]:
+def set_action_prob(x: Dict[int, float]) -> Dict[int, float]:
     return {act: prob / sum(x.values()) for act, prob in x.items()}
 
 
-class Node:
+class _Node:
 
     def __init__(self, parent,
                  child: dict = None,
-                 prv_prob: float = 0):
+                 prv_prob: float = 1.0):
         self.parent = parent
         self.child = dict() if child is None else child
         self.prv_prob = prv_prob
@@ -29,7 +28,7 @@ class Node:
     def expand(self, action_prob: Dict[int, float]) -> None:
         for action, prob in action_prob:
             if action not in self.child:
-                self.child[action] = Node(self, prv_prob=prob)
+                self.child[action] = _Node(self, prv_prob=prob)
 
     def select(self, cutoff: float):
         max_score, max_node = 0, None
@@ -66,17 +65,18 @@ class AbaloneMCTS:
         self._cutoff = cutoff
         self._max_depth = max_depth
 
-        self._root_node = Node(None)
+        self._root_node = _Node(None)
 
-    def get_action_prob(self, game_vector: np.ndarray) -> Dict[int, float]:
-        root_node = Node(None)
+    def get_action_prob(self, game_vector: np.ndarray, bound: float) -> (List[int], Dict[int, float]):
+        for n in range(self._max_depth):
+            temp_game_vector = game_vector.copy()
+            self.process_game(temp_game_vector)
 
-        nodes = list()
-        action_count = AbaloneModel.get_action_size(game_vector.size)
-        for action in range(action_count):
-            nodes.append(self.process_game(game_vector.copy()))
+        act_visits = [(act, node.visit_count) for act, node in self._root_node.child.items()]
+        acts, visits = zip(*act_visits)
+        act_prob = set_action_prob(1.0 / bound * np.log(np.array(visits) + 1e-8))
 
-        return prob_array(nodes)
+        return acts, act_prob
 
     def process_game(self, game_vector: np.ndarray):
         node = self._root_node
@@ -89,6 +89,7 @@ class AbaloneMCTS:
             self.agent.push_stone(*self.agent.decode_action(action))
 
         action_prob, cost = self.pruning_policy.prediction(game_vector)
+
         prv_color = self.agent.get_current_color()
         winner = self.agent.next_turn()
         if winner is not None:
@@ -96,7 +97,11 @@ class AbaloneMCTS:
         else:
             cost = 1 if winner == prv_color else -1
 
-        node.update_backward(cost)
+        node.update_backward(-1 * cost)
 
-    def forward_move(self):
-        pass
+    def forward_move(self, action: int):
+        if action in self._root_node.child:
+            self._root_node = self._root_node.child[action]
+            self._root_node.parent = None
+        else:
+            self._root_node = _Node(None)
