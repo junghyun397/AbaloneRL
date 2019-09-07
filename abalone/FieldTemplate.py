@@ -9,9 +9,14 @@ from abalone import AbaloneModel
 from abalone.StoneColor import StoneColor
 
 
+pixel_black = "@"
+pixel_white = "O"
+pixel_none = "+"
+
+
 def get_text_board(game_vector: np.ndarray) -> str:
     rs_str = (chr(32) * (game_vector[0] + 2)) + str().join([str(i + 1) + chr(32) for i in range(game_vector[0])])
-    tef, idx = (lambda w: "+" if w == StoneColor.NONE.value else ("@" if w == StoneColor.BLACK.value else "#")), 0
+    tef, idx = (lambda w: pixel_none if w == StoneColor.NONE.value else (pixel_black if w == StoneColor.BLACK.value else pixel_white)), 0
     for n in range(game_vector[0] * 2 - 1):
         if n < game_vector[0]:
             rs_str = str().join(chr(32) * (game_vector[0] - n - 1)) + chr(65 + n) + chr(32) \
@@ -29,9 +34,9 @@ def get_text_board(game_vector: np.ndarray) -> str:
 def load_text_board(info_vector: list, text_board: str) -> np.ndarray:
     return np.array(info_vector +
                     list(filter(partial(is_not, None),
-                                [0 if i == "+" else
-                                 (StoneColor.BLACK.value if i == "@" else
-                                  (StoneColor.WHITE.value if i == "#" else None))
+                                [StoneColor.NONE.value if i == pixel_none else
+                                 (StoneColor.BLACK.value if i == pixel_black else
+                                  (StoneColor.WHITE.value if i == pixel_white else None))
                                  for i in itertools.chain(*text_board.split("\n")[::-1])])), dtype=np.uint16)
 
 
@@ -51,9 +56,15 @@ def basic_start(edge_size: int) -> np.ndarray:
     return game_vector
 
 
-def random_filled_start(edge_size: int, fill_ratio: float = .5) -> np.ndarray:
+def random_filled_start(edge_size: int, fill_ratio: float = .4) -> np.ndarray:
     game_vector = AbaloneModel.new_vector(edge_size)
-    for idx in range(game_vector.size - 5):
-        if random.random() < fill_ratio:
-            game_vector[5 + idx] = StoneColor.BLACK.value if random.random() < .5 else StoneColor.WHITE.value
+    fill_ratio /= 2
+
+    for current_color in (StoneColor.BLACK.value, StoneColor.WHITE.value):
+        for f_idx in range(int((game_vector.size - 5) * fill_ratio // 1)):
+            while True:
+                pos = 5 + int(random.random() * (game_vector.size - 5) // 1)
+                if game_vector[pos] == StoneColor.NONE.value:
+                    game_vector[pos] = current_color
+                    break
     return game_vector
