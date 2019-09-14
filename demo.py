@@ -1,7 +1,7 @@
 import random
 
 from abalone.env.AbaloneEnvironment import AbaloneEnvironment
-from graphics.Qt5Graphic import Qt5Graphic
+# from graphics.Qt5Graphic import Qt5Graphic
 from graphics.TextGraphic import TextGraphic
 
 
@@ -13,16 +13,19 @@ graphic_mode = "TEXT"
 
 if __name__ == '__main__':
     env = AbaloneEnvironment()
-    graphic = Qt5Graphic(env.abalone_model.game_vector) if graphic_mode.lower() == "qt5"\
-        else TextGraphic(env.abalone_model.game_vector)
+    graphic = TextGraphic(env.abalone_model.game_vector)
 
+    game_success, game_total = 0, 0
     total_game, max_turns = 0, 0
     while True:
         _, info = env.action(random_policy(env.action_space))
-        _, drops, _, _, end = info
+        success, drops, _, _, end = info
+        game_success += sum(success)
+        game_total += 3
         if end:
             total_game += 1
             if not total_game % 100:
                 graphic.draw()
-                print(total_game)
+                print(total_game, game_success, game_total)
                 graphic.set_vector(new_vector=env.abalone_model.game_vector)
+            game_success, game_total = 0, 0
