@@ -1,7 +1,7 @@
 from typing import Callable
 
 import numpy as np
-from PyQt5.QtCore import QRunnable, QEvent
+from PyQt5.QtCore import QEvent
 from PyQt5.QtWidgets import QDesktopWidget, QMainWindow, QWidget
 
 from abalone import AbaloneModel
@@ -9,7 +9,7 @@ from abalone.HexDescription import HexDescription
 from graphics.GraphicModule import GraphicModule
 
 
-class Qt5GraphicWindowAgent(QMainWindow):
+class _Qt5GraphicWindowAgent(QMainWindow):
 
     def __init__(self,
                  edge_size: int,
@@ -17,7 +17,7 @@ class Qt5GraphicWindowAgent(QMainWindow):
                  block_size: int = 100,
                  boarder_size: int = 100,
                  fps: int = 120):
-        super(Qt5GraphicWindowAgent, self).__init__(flags=0)
+        super(_Qt5GraphicWindowAgent, self).__init__(flags=0)
         self.edge_size = edge_size
         self.event_handler = event_handler
         self.black_size = block_size
@@ -71,34 +71,25 @@ class Qt5GraphicWindowAgent(QMainWindow):
         self.event_handler(qEvent)
 
 
-class ThreadAdapter(QRunnable):
-
-    def __init__(self, window: Qt5GraphicWindowAgent):
-        super().__init__()
-        self.window = window
-        self.run()
-
-    def run(self):
-        while True:
-            pass
-
-
 class Qt5Graphic(GraphicModule):
 
-    def __init__(self, base_vector: np.ndarray,
+    def __init__(self, update_feq: int = 120,
+                 only_manual_draw: bool = False,
                  use_click_interface: bool = False,
                  event_handler: Callable[[int, int, HexDescription], bool] = (lambda _, __, ___: False)):
-        super().__init__(base_vector)
+        super().__init__(update_feq, only_manual_draw)
         self.event_handler = event_handler
-        self.n_agent = AbaloneModel.AbaloneAgent(base_vector[0])
+        self.n_agent = None
+
         if not use_click_interface:
             self.process_event = (lambda _, __: True)
-        self.runner = ThreadAdapter(Qt5GraphicWindowAgent(base_vector[0], self.process_event))
-        self.runner.run()
 
     def process_event(self, qEvent: QEvent) -> bool:
         x, y, des = self.n_agent.decode_action(0)
         return self.event_handler(x, y, des)
 
-    def draw(self) -> None:
-        self.runner.window.update_board(self.base_vector)
+    def _init_ui_components(self) -> None:
+        pass
+
+    def _draw(self) -> None:
+        pass

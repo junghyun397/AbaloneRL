@@ -1,7 +1,9 @@
+import argparse
 import random
 
+import args_parser
 from abalone.env.AbaloneEnvironment import AbaloneEnvironment
-# from graphics.Qt5Graphic import Qt5Graphic
+from graphics.Qt5Graphic import Qt5Graphic
 from graphics.TextGraphic import TextGraphic
 
 
@@ -11,9 +13,13 @@ def random_policy(action_space: int) -> list:
 
 graphic_mode = "TEXT"
 
+args = args_parser.parser.parse_args()
+
 if __name__ == '__main__':
     env = AbaloneEnvironment()
-    graphic = TextGraphic(env.abalone_model.game_vector)
+
+    graphic = TextGraphic(only_manual_draw=True) if args.graphic == "text" else Qt5Graphic(only_manual_draw=True)
+    graphic.init_ui(env.abalone_model.game_vector)
 
     game_success, game_total = 0, 0
     total_game, max_turns = 0, 0
@@ -25,7 +31,7 @@ if __name__ == '__main__':
         if end:
             total_game += 1
             if not total_game % 100:
-                graphic.draw()
-                print(total_game, game_success, game_total)
-                graphic.set_vector(new_vector=env.abalone_model.game_vector)
+                graphic.manual_draw()
+                print("++total-game: {0}, local-success: {1}, local-turns: {2}".format(total_game, game_success, game_total))
+                graphic.update_game_vector(new_vector=env.abalone_model.game_vector)
             game_success, game_total = 0, 0
