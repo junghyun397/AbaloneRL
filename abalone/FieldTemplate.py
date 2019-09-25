@@ -10,18 +10,19 @@ from abalone.StoneColor import StoneColor
 
 
 pixel_black = "@"
-pixel_white = "O"
+pixel_white = "#"
 pixel_none = "+"
 
 
 def get_text_board(game_vector: np.ndarray) -> str:
     rs_str = (chr(32) * (game_vector[0] + 2)) + str().join([str(i + 1) + chr(32) for i in range(game_vector[0])])
-    tef, idx = (lambda w: pixel_none if w == StoneColor.NONE.value else (pixel_black if w == StoneColor.BLACK.value else pixel_white)), 0
+    tef, idx = (lambda w: pixel_none if w == StoneColor.NONE.value else
+        (pixel_black if w == StoneColor.BLACK.value else pixel_white)), 0
     for n in range(game_vector[0] * 2 - 1):
         if n < game_vector[0]:
             rs_str = str().join(chr(32) * (game_vector[0] - n - 1)) + chr(65 + n) + chr(32) \
                      + chr(32).join([tef(game_vector[5 + idx + c]) for c in range(game_vector[0] + n)]) \
-                     + (lambda v: "" if v > game_vector[0] - 2 else chr(32) + str(game_vector[0] + v + 1))(n) \
+                     + "" if n > game_vector[0] - 2 else chr(32) + str(game_vector[0] + n + 1) \
                      + "\n" + rs_str
         else:
             rs_str = str().join(chr(32) * (n - game_vector[0])) + chr(32) + chr(65 + n) + chr(32) \
