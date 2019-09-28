@@ -4,7 +4,7 @@ from abc import abstractmethod, ABCMeta
 import numpy as np
 
 
-class SyncModule:
+class _SyncModule:
 
     def __init__(self):
         self.base_vector = None
@@ -20,7 +20,7 @@ class GraphicModule(metaclass=ABCMeta):
         self.update_feq = update_feq
         self.feq_draw = not only_manual_draw
 
-        self.sync_module = SyncModule()
+        self.sync_module = _SyncModule()
 
         self._main_thread = None
 
