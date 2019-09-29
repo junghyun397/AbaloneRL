@@ -12,22 +12,23 @@ class Qt5UserInterfaceAgent(QMainWindow):
 
     def __init__(self,
                  sync_module: _SyncModule,
+                 fps: int,
                  disable_click_interface: bool,
                  event_handler: Callable[[QEvent], bool],
-                 fps: int,
                  block_size: int = 50,
                  boarder_size: int = 50):
         # noinspection PyArgumentList
         super(Qt5UserInterfaceAgent, self).__init__()
         self.sync_module = sync_module
-        self.edge_size = sync_module.base_vector[0]
+        self.fps = fps
 
         self.disable_click_interface = disable_click_interface
         self.event_handler = event_handler
 
+        self.edge_size = sync_module.base_vector[0]
+
         self.black_size = block_size
         self.boarder_size = boarder_size
-        self.fps = fps
 
         self.init_ui((self.edge_size * 2 - 1) * block_size + boarder_size * 2 + 200,
                      (self.edge_size * 2 - 1) * block_size + boarder_size * 2)

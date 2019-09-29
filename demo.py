@@ -17,7 +17,7 @@ args = args_parser.parser.parse_args()
 if __name__ == '__main__':
     env = AbaloneEnvironment()
 
-    graphic = TextGraphic(only_manual_draw=True) if args.graphic == "text" else Qt5Graphic(only_manual_draw=True)
+    graphic = TextGraphic(disable_auto_draw=True) if args.graphic == "text" else Qt5Graphic(disable_auto_draw=True)
     graphic.init_ui(env.abalone_model.game_vector)
 
     game_success, game_total = 0, 0

@@ -8,9 +8,9 @@ from graphics.GraphicModule import GraphicModule
 class TextGraphic(GraphicModule):
 
     def __init__(self, update_feq: int = 1,
-                 only_manual_draw: bool = False,
+                 disable_auto_draw: bool = False,
                  use_info_text: bool = True):
-        super().__init__(update_feq, only_manual_draw)
+        super().__init__(update_feq, disable_auto_draw)
 
         self._info_text = ">> Turns: {0}, Dropped black: {1}, Dropped white: {2}\n" if use_info_text else None
         self.__draw = self._initialized_draw

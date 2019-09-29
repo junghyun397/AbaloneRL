@@ -16,9 +16,9 @@ class _SyncModule:
 class GraphicModule(metaclass=ABCMeta):
 
     def __init__(self, update_feq: int,
-                 only_manual_draw: bool) -> None:
+                 disable_auto_draw: bool) -> None:
         self.update_feq = update_feq
-        self.feq_draw = not only_manual_draw
+        self.feq_draw = not disable_auto_draw
 
         self.sync_module = _SyncModule()
 
