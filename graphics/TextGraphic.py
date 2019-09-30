@@ -16,11 +16,11 @@ class TextGraphic(GraphicModule):
         self._draw = self._initialized_draw
 
     def _build_task(self) -> threading.Thread:
-        task = threading.Thread(target=self.__main_loop, args=[])
+        task = threading.Thread(target=self._main_loop, args=[])
         task.daemon = True
         return task
 
-    def __main_loop(self) -> None:
+    def _main_loop(self) -> None:
         prv_time = time.time()
         while self.sync_module.run:
             if self.feq_draw and time.time() - prv_time > 1 / self.update_feq:
