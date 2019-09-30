@@ -2,6 +2,7 @@ import itertools
 import random
 from functools import partial
 from operator import is_not
+from typing import List
 
 import numpy as np
 
@@ -9,20 +10,20 @@ from abalone import AbaloneModel
 from abalone.StoneColor import StoneColor
 
 
-pixel_black = "@"
-pixel_white = "#"
-pixel_none = "+"
+PIXEL_BLACK = "@"
+PIXEL_WHITE = "#"
+PIXEL_NONE = "+"
 
 
 def get_text_board(game_vector: np.ndarray) -> str:
     rs_str = (chr(32) * (game_vector[0] + 2)) + str().join([str(i + 1) + chr(32) for i in range(game_vector[0])])
-    tef, idx = (lambda w: pixel_none if w == StoneColor.NONE.value else
-        (pixel_black if w == StoneColor.BLACK.value else pixel_white)), 0
+    tef, idx = (lambda w: PIXEL_NONE if w == StoneColor.NONE.value else
+        (PIXEL_BLACK if w == StoneColor.BLACK.value else PIXEL_WHITE)), 0
     for n in range(game_vector[0] * 2 - 1):
         if n < game_vector[0]:
             rs_str = str().join(chr(32) * (game_vector[0] - n - 1)) + chr(65 + n) + chr(32) \
                      + chr(32).join([tef(game_vector[5 + idx + c]) for c in range(game_vector[0] + n)]) \
-                     + "" if n > game_vector[0] - 2 else chr(32) + str(game_vector[0] + n + 1) \
+                     + ("" if n > game_vector[0] - 2 else chr(32) + str(game_vector[0] + n + 1)) \
                      + "\n" + rs_str
         else:
             rs_str = str().join(chr(32) * (n - game_vector[0])) + chr(32) + chr(65 + n) + chr(32) \
@@ -32,13 +33,13 @@ def get_text_board(game_vector: np.ndarray) -> str:
     return rs_str
 
 
-def load_text_board(info_vector: list, text_board: str) -> np.ndarray:
+def load_text_board(info_vector: List[int], text_board: str) -> np.ndarray:
     return np.array(info_vector +
                     list(filter(partial(is_not, None),
-                                [StoneColor.NONE.value if i == pixel_none else
-                                 (StoneColor.BLACK.value if i == pixel_black else
-                                  (StoneColor.WHITE.value if i == pixel_white else None))
-                                 for i in itertools.chain(*text_board.split("\n")[::-1])])), dtype=np.uint16)
+                        [StoneColor.NONE.value if i == PIXEL_NONE else
+                        (StoneColor.BLACK.value if i == PIXEL_BLACK else
+                        (StoneColor.WHITE.value if i == PIXEL_WHITE else None))
+                        for i in itertools.chain(*text_board.split("\n")[::-1])])), dtype=AbaloneModel.FIELD_DTYPE)
 
 
 def basic_start(edge_size: int) -> np.ndarray:

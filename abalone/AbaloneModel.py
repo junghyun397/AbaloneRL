@@ -6,6 +6,8 @@ import numpy as np
 from abalone.HexDescription import HexDescription
 from abalone.StoneColor import StoneColor
 
+FIELD_DTYPE = np.uint8
+
 
 # Vector Size Control
 
@@ -90,11 +92,11 @@ def build_role_vector(max_turn: int = 1000,
 # Vector Generator
 
 def new_field(edge_size: int) -> np.ndarray:
-    return np.zeros((get_field_size(edge_size),), dtype=np.uint8)
+    return np.zeros((get_field_size(edge_size),), dtype=FIELD_DTYPE)
 
 
 def new_vector(edge_size: int) -> np.ndarray:
-    return np.array([edge_size] + [0] * (get_field_size(edge_size) + 4), dtype=np.uint8)
+    return np.array([edge_size] + [0] * (get_field_size(edge_size) + 4), dtype=FIELD_DTYPE)
 
 
 def build_game_vector(edge_size: int,
@@ -103,7 +105,7 @@ def build_game_vector(edge_size: int,
                  out_black: int,
                  out_white: int,
                  filed: np.ndarray):
-    return np.array([edge_size, turns, current_color, out_black, out_white] + filed, dtype=np.uint8)
+    return np.array([edge_size, turns, current_color, out_black, out_white] + filed, dtype=FIELD_DTYPE)
 
 
 # Role Vector Index
