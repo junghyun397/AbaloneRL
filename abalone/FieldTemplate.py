@@ -45,16 +45,16 @@ def load_text_board(info_vector: List[int], text_board: str) -> np.ndarray:
 def basic_start(edge_size: int) -> np.ndarray:
     game_vector = AbaloneModel.new_vector(edge_size)
     if edge_size < 5:
-        game_vector.put([5] + np.arange(edge_size), StoneColor.BLACK.value)
-        game_vector.put([game_vector.size - edge_size] + np.arange(edge_size), StoneColor.WHITE.value)
+        game_vector.put([5] + np.arange(edge_size), StoneColor.WHITE.value)
+        game_vector.put([game_vector.size - edge_size] + np.arange(edge_size), StoneColor.BLACK.value)
         if edge_size > 2:
-            game_vector.put(([game_vector.size - edge_size - 2] - np.arange(edge_size - 1)), StoneColor.WHITE.value)
-            game_vector.put([6 + edge_size] + np.arange(edge_size - 1), StoneColor.BLACK.value)
+            game_vector.put([6 + edge_size] + np.arange(edge_size - 1), StoneColor.WHITE.value)
+            game_vector.put(([game_vector.size - edge_size - 2] - np.arange(edge_size - 1)), StoneColor.BLACK.value)
         return game_vector
-    game_vector.put([5] + np.arange(edge_size * 2 + 1), StoneColor.BLACK.value)
-    game_vector.put([edge_size * 2 + 8] + np.arange(edge_size - 2), StoneColor.BLACK.value)
-    game_vector.put([game_vector.size - 1] - np.arange(edge_size * 2 + 1), StoneColor.WHITE.value)
-    game_vector.put([game_vector.size - edge_size * 2 - 4] - np.arange(edge_size - 2), StoneColor.WHITE.value)
+    game_vector.put([5] + np.arange(edge_size * 2 + 1), StoneColor.WHITE.value)
+    game_vector.put([edge_size * 2 + 8] + np.arange(edge_size - 2), StoneColor.WHITE.value)
+    game_vector.put([game_vector.size - 1] - np.arange(edge_size * 2 + 1), StoneColor.BLACK.value)
+    game_vector.put([game_vector.size - edge_size * 2 - 4] - np.arange(edge_size - 2), StoneColor.BLACK.value)
     return game_vector
 
 
