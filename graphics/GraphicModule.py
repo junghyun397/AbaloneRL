@@ -4,12 +4,12 @@ from abc import abstractmethod, ABCMeta
 import numpy as np
 
 
-class _SyncModule:
+class SyncModule:
 
-    def __init__(self):
-        self.base_vector = None
+    def __init__(self, base_vector: np.ndarray):
+        self.base_vector = base_vector
+
         self.run = True
-
         self.sig_force_draw = False
 
 
@@ -20,12 +20,11 @@ class GraphicModule(metaclass=ABCMeta):
         self.update_feq = update_feq
         self.feq_draw = not disable_auto_draw
 
-        self.sync_module = _SyncModule()
-
+        self.sync_module = None
         self._main_thread = None
 
-    def init_ui(self, base_vector) -> None:
-        self.sync_module.base_vector = base_vector
+    def init_ui(self, base_vector: np.ndarray) -> None:
+        self.sync_module = SyncModule(base_vector)
 
         self._main_thread = self._build_task()
         self._main_thread.start()

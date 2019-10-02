@@ -2,8 +2,8 @@ import os
 import sys
 import threading
 
+from PyQt5 import QtCore
 from PyQt5.QtWidgets import QApplication
-from qtconsole.qt import QtGui, QtCore
 
 from graphics.GraphicModule import GraphicModule
 from graphics.Qt5UserInterfaceAgent import Qt5UserInterfaceAgent
@@ -28,9 +28,8 @@ class Qt5Graphic(GraphicModule):
             os.environ["QT_AUTO_SCREEN_SCALE_FACTOR"] = "1"
             QApplication.setAttribute(QtCore.Qt.AA_EnableHighDpiScaling, True)
 
-        app = QtGui.QApplication(sys.argv)
+        app = QApplication([])
         ex = self._get_ex()
-
         sys.exit(app.exec_())
 
     def _get_ex(self) -> Qt5UserInterfaceAgent:

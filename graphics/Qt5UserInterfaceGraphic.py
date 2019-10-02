@@ -3,7 +3,7 @@ import threading
 from typing import Callable
 
 from PyQt5.QtCore import QEvent
-from qtconsole.qt import QtGui
+from PyQt5.QtWidgets import QApplication
 
 from graphics.GraphicModule import GraphicModule
 from graphics.Qt5UserInterfaceAgent import Qt5UserInterfaceAgent
@@ -23,7 +23,7 @@ class Qt5UserInterfaceGraphic(GraphicModule):
         return task
 
     def _run_pyqt5_ui(self) -> None:
-        app = QtGui.QApplication(sys.argv)
+        app = QApplication(sys.argv)
         # noinspection PyUnusedLocal
         ex = Qt5UserInterfaceAgent(sync_module=self.sync_module,
                               disable_click_interface=False, event_handler=self._process_event,
