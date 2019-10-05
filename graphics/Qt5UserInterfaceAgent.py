@@ -1,7 +1,7 @@
 from typing import Callable
 
 import numpy as np
-from PyQt5.QtCore import QEvent, QSize, Qt
+from PyQt5.QtCore import QEvent, QSize, Qt, QTimer
 from PyQt5.QtGui import QColor, QPaintEvent, QPainter, QPen, QBrush, QMouseEvent
 from PyQt5.QtWidgets import QDesktopWidget, QWidget, QMainWindow, QHBoxLayout, QVBoxLayout
 
@@ -9,32 +9,33 @@ from abalone import AbaloneModel
 from abalone.StoneColor import StoneColor
 from graphics.GraphicModule import SyncModule
 
-BACKGROUND_COLOR = QColor("#FFFFFF")
+OUTLINE_COLOR = {
+    "NORMAL": QColor("#212121"),
+    "SUCCESS_SELECT": QColor("#00C853"),
+    "FAIL_SELECT": QColor("#D50000")
+}
 
-BOUND_COLOR = QColor("#000000")
-SELECTED_BOUND_COLOR = QColor("#777777")
-
-CELL_COLOR = {StoneColor.NONE: QColor("#111111"),
-              StoneColor.BLACK: QColor("#222222"),
-              StoneColor.WHITE: QColor("#333333")}
+CELL_COLOR = {StoneColor.BLACK: QColor("#263238"),
+              StoneColor.WHITE: QColor("#CFD8DC")}
 
 
 class _Qt5AbaloneCell(QWidget):
 
-    def __init__(self, y: int, x: int, block_size: int):
+    def __init__(self, block_size: int,
+                 click_handler: Callable[[], bool]):
         # noinspection PyArgumentList
         super(_Qt5AbaloneCell, self).__init__()
 
-        self.y, self.x = y, x
         self.block_size = block_size
-        self.out_line_size = block_size // 15
+        self.click_handler = click_handler
 
-        self.stone_color = StoneColor.NONE
+        self.out_line_size = block_size // 15
+        self.cell_color = StoneColor.NONE
         self.selected = False
 
-        self.init_cell()
+        self._init_cell()
 
-    def init_cell(self):
+    def _init_cell(self):
         self.setFixedSize(QSize(self.block_size, self.block_size))
         self.update()
 
@@ -44,139 +45,152 @@ class _Qt5AbaloneCell(QWidget):
         painter = QPainter(self)
         painter.setRenderHint(QPainter.Antialiasing)
 
-        if self.stone_color != StoneColor.NONE:
-            painter.setBrush(QBrush(CELL_COLOR[self.stone_color], Qt.SolidPattern))
+        if self.cell_color != StoneColor.NONE:
+            painter.setBrush(QBrush(CELL_COLOR[self.cell_color], Qt.SolidPattern))
 
-        painter.setPen(QPen(SELECTED_BOUND_COLOR if self.selected else BOUND_COLOR,
+        painter.setPen(QPen(OUTLINE_COLOR["SUCCESS_SELECT"] if self.selected else OUTLINE_COLOR["NORMAL"],
                             self.out_line_size, Qt.SolidLine))
         painter.drawEllipse(self.out_line_size, self.out_line_size,
                             self.block_size - self.out_line_size * 2, self.block_size - self.out_line_size * 2)
 
     def mouseReleaseEvent(self, q_mouse_event: QMouseEvent):
-        if q_mouse_event.button() == Qt.LeftButton and not self.selected:
-            self.set_select(True)
-        elif q_mouse_event.button() == Qt.RightButton and self.selected:
-            self.set_select(False)
+        if self.click_handler() and q_mouse_event.button() == Qt.LeftButton:
+            self.set_select(not self.selected)
 
     # Cell Control
 
     def reset_cell(self) -> None:
-        self.stone_color = StoneColor.NONE
+        self.cell_color = StoneColor.NONE
         self.selected = False
         self.update()
 
     def set_color(self, color: StoneColor = StoneColor.NONE) -> None:
-        self.stone_color = color
-        self.update()
+        if self.cell_color != color:
+            self.cell_color = color
+            self.update()
 
     def set_select(self, selected: bool = True) -> None:
-        self.selected = selected
-        self.update()
+        if not (self.cell_color == StoneColor.NONE and not self.selected or self.selected == selected):
+            self.selected = selected
+            self.update()
 
 
 class Qt5UserInterfaceAgent(QMainWindow):
 
+    # noinspection PyArgumentList
     def __init__(self,
                  sync_module: SyncModule,
                  fps: int,
                  disable_click_interface: bool,
                  event_handler: Callable[[QEvent], bool],
-                 block_size: int = 50,
-                 boarder_size: int = 50):
-        # noinspection PyArgumentList
+                 block_size: int = 50):
         super(Qt5UserInterfaceAgent, self).__init__()
         self.sync_module = sync_module
         self.fps = fps
-
         self.disable_click_interface = disable_click_interface
         self.event_handler = event_handler
+        self.block_size = block_size
 
         self.edge_size = sync_module.base_vector[0]
 
-        self.block_size = block_size
-        self.boarder_size = boarder_size
-
+        self._abalone_cell = list()
+        self._timer = None
         self._prv_board_hash = None
 
-        self.init_ui()
-        self.init_timer(fps)
+        if disable_click_interface:
+            self._handle_click_event = lambda _, __: False
+
+        self._init_ui()
+        self._init_timer()
 
     # Init UI
 
     # noinspection PyArgumentList
-    def init_ui(self) -> None:
-        self.setWindowTitle("AbaloneRL PyQt5 Graphic User Interface")
+    def _init_ui(self) -> None:
+        self.setWindowTitle("AbaloneRL Qt5 "
+                            + ("Graphic User Interface" if self.disable_click_interface else "Visualizer"))
+        self.statusBar().showMessage("AbaloneRL, Ready")
 
         center_weight = QWidget()
         horizon_layout = QHBoxLayout()
 
         board_layout = QVBoxLayout()
-        self.init_abalone_board(board_layout)
+        board_layout.setSpacing(0)
+        board_layout.setContentsMargins(*[self.block_size // 4] * 4)
+
+        self._init_abalone_board(board_layout)
 
         horizon_layout.addLayout(board_layout)
 
         center_weight.setLayout(horizon_layout)
         self.setCentralWidget(center_weight)
-        self.center()
 
-        self.show()
-
-    # noinspection PyArgumentList
-    def init_abalone_board(self, board_layout: QVBoxLayout) -> None:
-        offset = 0
-
-        def build_layout():
-            new_layout = QHBoxLayout()
-            new_layout.setAlignment(Qt.AlignLeft)
-            new_layout.addSpacing(offset)
-            return new_layout
-
-        prv_layout, prv_y = build_layout(), 0
-        for idx, y, x in AbaloneModel.pos_iterator(self.edge_size):
-            if prv_y != y:
-                board_layout.addLayout(prv_layout)
-                prv_layout, prv_y = build_layout(), y
-
-            cell = _Qt5AbaloneCell(y, x, self.block_size)
-            prv_layout.addWidget(cell)
-        board_layout.addLayout(prv_layout)
-
-    def init_timer(self, feq: int) -> None:
-        pass
-
-    # Qt5 UI
-
-    def center(self) -> None:
         qr = self.frameGeometry()
         qr.moveCenter(QDesktopWidget().availableGeometry().center())
         self.move(qr.topLeft())
 
-    # Control UI
+        self.show()
+
+    # noinspection PyArgumentList
+    def _init_abalone_board(self, board_layout: QVBoxLayout) -> None:
+        def next_layout(y: int):
+            new_layout = QHBoxLayout()
+            new_layout.setAlignment(Qt.AlignLeft)
+            new_layout.addSpacing((self.edge_size - y - 1 if y < self.edge_size else y - self.edge_size + 1)
+                                  * (self.block_size + self.block_size // 5) / 2)
+            new_layout.setSpacing(self.block_size // 5)
+            return new_layout
+
+        prv_layout, prv_y = next_layout(0), 0
+        for idx, y, x in AbaloneModel.pos_iterator(self.edge_size):
+            if prv_y != y:
+                board_layout.addLayout(prv_layout)
+                prv_layout, prv_y = next_layout(y), y
+
+            cell = _Qt5AbaloneCell(self.block_size, lambda: self._handle_click_event(y, x))
+            prv_layout.addWidget(cell)
+            self._abalone_cell.append(cell)
+        board_layout.addLayout(prv_layout)
+
+        self.update_board(self.sync_module.base_vector)
+
+    # noinspection PyUnresolvedReferences
+    def _init_timer(self) -> None:
+        self._timer = QTimer()
+        self._timer.timeout.connect(self._timer_tick)
+        self._timer.start(1000 // self.fps)
+
+    # Qt5 UI
 
     def update_board(self, game_vector: np.ndarray) -> None:
-        self._draw_guid_line()
-        self._draw_cell(game_vector)
-        self._draw_info(game_vector)
+        self.update_status_bar(game_vector)
 
-    def _draw_guid_text(self) -> None:
-        pass
+        def update(cell, index):
+            cell.set_color(StoneColor(game_vector[index + 5]))
+            cell.set_select(False)
 
-    def _draw_guid_line(self) -> None:
-        pass
+        self._seq_iteration_board(lambda cell, index: update(cell, index))
 
-    def _draw_cell(self, game_vector: np.ndarray) -> None:
-        pass
+    def reset_board(self) -> None:
+        self._iteration_board(lambda cell: cell.reset_cell())
 
-    def _draw_info(self, game_vector: np.ndarray) -> None:
-        pass
-
-    def _update_cell(self) -> None:
-        pass
+    def update_status_bar(self, game_vector: np.ndarray):
+        self.statusBar().showMessage("Turns: {0}; Drop Black: {1}; Drop White: {2}; Current Color: {3}"
+                                     .format(game_vector[1], game_vector[3], game_vector[4],
+                                             "BLACK" if game_vector[2] == StoneColor.BLACK else "WHITE"))
 
     # Bin Control UI
 
+    def _iteration_board(self, f: Callable[[_Qt5AbaloneCell], None]) -> None:
+        for cell in self._abalone_cell:
+            f(cell)
+
+    def _seq_iteration_board(self, f: Callable[[_Qt5AbaloneCell, int], None]) -> None:
+        for index in range(len(self._abalone_cell)):
+            f(self._abalone_cell[index], index)
+
     def _detect_diff_board(self) -> bool:
-        board_hash = self.sync_module.base_vector.__hash__
+        board_hash = hash(self.sync_module.base_vector.__str__())
         if self._prv_board_hash == board_hash:
             return False
         else:
@@ -185,5 +199,9 @@ class Qt5UserInterfaceAgent(QMainWindow):
 
     # User Click-Interface
 
-    # def event(self, q_event):
-    #     return self.event_handler(q_event)
+    def _timer_tick(self):
+        if self._detect_diff_board():
+            self.update_board(self.sync_module.base_vector)
+
+    def _handle_click_event(self, y, x) -> bool:
+        return True

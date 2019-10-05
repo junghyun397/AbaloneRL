@@ -100,12 +100,12 @@ def new_vector(edge_size: int) -> np.ndarray:
 
 
 def build_game_vector(edge_size: int,
-                 turns: int,
-                 current_color: int,
-                 out_black: int,
-                 out_white: int,
-                 filed: np.ndarray):
-    return np.array([edge_size, turns, current_color, out_black, out_white] + filed, dtype=FIELD_DTYPE)
+                      turns: int,
+                      current_color: int,
+                      out_black: int,
+                      out_white: int,
+                      field: np.ndarray):
+    return np.array([edge_size, turns, current_color, out_black, out_white] + field, dtype=FIELD_DTYPE)
 
 
 # Role Vector Index

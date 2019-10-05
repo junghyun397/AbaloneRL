@@ -1,15 +1,12 @@
-import sys
-import threading
 from typing import Callable
 
 from PyQt5.QtCore import QEvent
-from PyQt5.QtWidgets import QApplication
 
-from graphics.GraphicModule import GraphicModule
+from graphics.Qt5Graphic import Qt5Graphic
 from graphics.Qt5UserInterfaceAgent import Qt5UserInterfaceAgent
 
 
-class Qt5UserInterfaceGraphic(GraphicModule):
+class Qt5UserInterfaceGraphic(Qt5Graphic):
 
     def __init__(self, user_control_interface: Callable[[int], bool],
                  update_feq: int = 60):
@@ -17,18 +14,10 @@ class Qt5UserInterfaceGraphic(GraphicModule):
 
         self.control_interface = user_control_interface
 
-    def _build_task(self) -> threading.Thread:
-        task = threading.Thread(target=self._run_pyqt5_ui, args=[])
-        task.daemon = True
-        return task
-
-    def _run_pyqt5_ui(self) -> None:
-        app = QApplication(sys.argv)
-        # noinspection PyUnusedLocal
-        ex = Qt5UserInterfaceAgent(sync_module=self.sync_module,
+    def _get_ex(self) -> Qt5UserInterfaceAgent:
+        return Qt5UserInterfaceAgent(sync_module=self.sync_module,
                               disable_click_interface=False, event_handler=self._process_event,
                               fps=self.update_feq)
-        sys.exit(app.exec_())
 
     def _process_event(self, q_event: QEvent) -> bool:
         return self.control_interface(1)
