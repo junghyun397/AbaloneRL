@@ -13,12 +13,12 @@ from graphics.Qt5UserInterfaceAgent import Qt5UserInterfaceAgent
 
 class TestQt5Graphic(unittest.TestCase):
 
-    def test_random_modify_cell(self):
+    def test_visualizer_mode(self):
         board = FieldTemplate.basic_start(5)
 
         def update():
             prv_time = time.time()
-            while False:
+            while True:
                 if prv_time + 1 / 60 < time.time():
                     board[random.randrange(5, board.size)] = random.randrange(0, 3)
                     prv_time = time.time()
@@ -28,7 +28,12 @@ class TestQt5Graphic(unittest.TestCase):
         task.start()
 
         app = QApplication(sys.argv)
-        ex = Qt5UserInterfaceAgent(sync_module=SyncModule(board), fps=60,
-                                   disable_click_interface=False, event_handler=lambda _: False,
-                                   block_size=150)
-        sys.exit(app.exec_())
+        ex = Qt5UserInterfaceAgent(SyncModule(board), disable_auto_draw=False)
+        sys.exit(app.exec())
+
+    def test_ui_mode(self):
+        board = FieldTemplate.basic_start(5)
+
+        app = QApplication(sys.argv)
+        ex = Qt5UserInterfaceAgent(SyncModule(board), disable_click_interface=False, click_handler=lambda _, __: True)
+        sys.exit(app.exec())

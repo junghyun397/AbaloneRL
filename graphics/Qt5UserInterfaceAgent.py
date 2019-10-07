@@ -1,7 +1,7 @@
 from typing import Callable
 
 import numpy as np
-from PyQt5.QtCore import QEvent, QSize, Qt, QTimer
+from PyQt5.QtCore import QSize, Qt, QTimer
 from PyQt5.QtGui import QColor, QPaintEvent, QPainter, QPen, QBrush, QMouseEvent
 from PyQt5.QtWidgets import QDesktopWidget, QWidget, QMainWindow, QHBoxLayout, QVBoxLayout
 
@@ -80,15 +80,17 @@ class Qt5UserInterfaceAgent(QMainWindow):
     # noinspection PyArgumentList
     def __init__(self,
                  sync_module: SyncModule,
-                 fps: int,
-                 disable_click_interface: bool,
-                 event_handler: Callable[[QEvent], bool],
+                 fps: int = 30,
+                 disable_auto_draw: bool = True,
+                 disable_click_interface: bool = True,
+                 click_handler: Callable[[int, int], bool] = lambda _, __: False,
                  block_size: int = 50):
         super(Qt5UserInterfaceAgent, self).__init__()
         self.sync_module = sync_module
         self.fps = fps
+        self.disable_auto_draw = disable_auto_draw
         self.disable_click_interface = disable_click_interface
-        self.event_handler = event_handler
+        self.click_handler = click_handler
         self.block_size = block_size
 
         self.edge_size = sync_module.base_vector[0]
@@ -96,9 +98,6 @@ class Qt5UserInterfaceAgent(QMainWindow):
         self._abalone_cell = list()
         self._timer = None
         self._prv_board_hash = None
-
-        if disable_click_interface:
-            self._handle_click_event = lambda _, __: False
 
         self._init_ui()
         self._init_timer()
@@ -108,7 +107,7 @@ class Qt5UserInterfaceAgent(QMainWindow):
     # noinspection PyArgumentList
     def _init_ui(self) -> None:
         self.setWindowTitle("AbaloneRL Qt5 "
-                            + ("Graphic User Interface" if self.disable_click_interface else "Visualizer"))
+                            + ("Visualizer" if self.disable_click_interface else "Graphic User Interface"))
         self.statusBar().showMessage("AbaloneRL, Ready")
 
         center_weight = QWidget()
@@ -133,6 +132,7 @@ class Qt5UserInterfaceAgent(QMainWindow):
 
     # noinspection PyArgumentList
     def _init_abalone_board(self, board_layout: QVBoxLayout) -> None:
+        # noinspection PyShadowingNames
         def next_layout(y: int):
             new_layout = QHBoxLayout()
             new_layout.setAlignment(Qt.AlignLeft)
@@ -147,7 +147,7 @@ class Qt5UserInterfaceAgent(QMainWindow):
                 board_layout.addLayout(prv_layout)
                 prv_layout, prv_y = next_layout(y), y
 
-            cell = _Qt5AbaloneCell(self.block_size, lambda: self._handle_click_event(y, x))
+            cell = _Qt5AbaloneCell(self.block_size, lambda: self.click_handler(y, x))
             prv_layout.addWidget(cell)
             self._abalone_cell.append(cell)
         board_layout.addLayout(prv_layout)
@@ -171,13 +171,15 @@ class Qt5UserInterfaceAgent(QMainWindow):
 
         self._seq_iteration_board(lambda cell, index: update(cell, index))
 
-    def reset_board(self) -> None:
-        self._iteration_board(lambda cell: cell.reset_cell())
-
     def update_status_bar(self, game_vector: np.ndarray):
         self.statusBar().showMessage("Turns: {0}; Drop Black: {1}; Drop White: {2}; Current Color: {3}"
                                      .format(game_vector[1], game_vector[3], game_vector[4],
                                              "BLACK" if game_vector[2] == StoneColor.BLACK else "WHITE"))
+
+    # Board Control UI
+
+    def reset_board(self) -> None:
+        self._iteration_board(lambda cell: cell.reset_cell())
 
     # Bin Control UI
 
@@ -200,8 +202,7 @@ class Qt5UserInterfaceAgent(QMainWindow):
     # User Click-Interface
 
     def _timer_tick(self):
-        if self._detect_diff_board():
+        if self.sync_module.sig_force_draw:
             self.update_board(self.sync_module.base_vector)
-
-    def _handle_click_event(self, y, x) -> bool:
-        return True
+        elif not self.disable_auto_draw and self._detect_diff_board():
+            self.update_board(self.sync_module.base_vector)
