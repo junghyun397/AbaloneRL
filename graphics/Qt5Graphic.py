@@ -33,5 +33,5 @@ class Qt5Graphic(GraphicModule):
         sys.exit(app.exec_())
 
     def _get_ex(self) -> Qt5UserInterfaceAgent:
-        return Qt5UserInterfaceAgent(sync_module=self.sync_module, fps=self.update_feq,
+        return Qt5UserInterfaceAgent(sync_queue=self.sync_queue, fps=self.update_feq,
                                      disable_click_interface=True, click_handler=lambda _: False)

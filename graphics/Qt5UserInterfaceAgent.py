@@ -1,3 +1,4 @@
+from queue import Queue
 from typing import Callable
 
 import numpy as np
@@ -7,7 +8,7 @@ from PyQt5.QtWidgets import QDesktopWidget, QWidget, QMainWindow, QHBoxLayout, Q
 
 from abalone import AbaloneModel
 from abalone.StoneColor import StoneColor
-from graphics.GraphicModule import SyncModule
+from graphics.QSyncManager import SyncModule, iteration_queue, SyncType
 
 OUTLINE_COLOR = {
     "NORMAL": QColor("#212121"),
@@ -79,27 +80,30 @@ class Qt5UserInterfaceAgent(QMainWindow):
 
     # noinspection PyArgumentList
     def __init__(self,
-                 sync_module: SyncModule,
+                 sync_queue: Queue[SyncModule],
                  fps: int = 30,
                  disable_auto_draw: bool = True,
                  disable_click_interface: bool = True,
                  click_handler: Callable[[int, int], bool] = lambda _, __: False,
                  block_size: int = 50):
         super(Qt5UserInterfaceAgent, self).__init__()
-        self.sync_module = sync_module
+        self.sync_queue = sync_queue
         self.fps = fps
         self.disable_auto_draw = disable_auto_draw
         self.disable_click_interface = disable_click_interface
         self.click_handler = click_handler
         self.block_size = block_size
 
-        self.edge_size = sync_module.base_vector[0]
+        init_data = sync_queue.get()
+
+        self.edge_size = init_data.game_vector[0]
 
         self._abalone_cell = list()
         self._timer = None
         self._prv_board_hash = None
 
         self._init_ui()
+        self.update_board(init_data.game_vector)
         self._init_timer()
 
     # Init UI
@@ -152,8 +156,6 @@ class Qt5UserInterfaceAgent(QMainWindow):
             self._abalone_cell.append(cell)
         board_layout.addLayout(prv_layout)
 
-        self.update_board(self.sync_module.base_vector)
-
     # noinspection PyUnresolvedReferences
     def _init_timer(self) -> None:
         self._timer = QTimer()
@@ -192,7 +194,7 @@ class Qt5UserInterfaceAgent(QMainWindow):
             f(self._abalone_cell[index], index)
 
     def _detect_diff_board(self) -> bool:
-        board_hash = hash(self.sync_module.base_vector.__str__())
+        board_hash = hash(self.sync_queue.base_vector.__str__())
         if self._prv_board_hash == board_hash:
             return False
         else:
@@ -202,7 +204,8 @@ class Qt5UserInterfaceAgent(QMainWindow):
     # User Click-Interface
 
     def _timer_tick(self):
-        if self.sync_module.sig_force_draw:
-            self.update_board(self.sync_module.base_vector)
-        elif not self.disable_auto_draw and self._detect_diff_board():
-            self.update_board(self.sync_module.base_vector)
+        for queue in iteration_queue(self.sync_queue):
+            if queue.sync_type == SyncType.SYNC_DRAW:
+                self.update_board(queue.game_vector)
+            elif queue.sync_type == SyncType.SYNC_KILL:
+                exit()

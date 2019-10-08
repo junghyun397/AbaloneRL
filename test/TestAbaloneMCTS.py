@@ -15,8 +15,8 @@ class TestAbaloneMCTS(unittest.TestCase):
     def test_process_turn(self):
         mcts.process_game(model5.game_vector)
 
-    def test_find_with_random_policy(self):
+    def test_find_best_with_random_policy(self):
         mcts.process_game(model5.game_vector)
 
-    def test_find_with_unlimited_depth(self):
+    def test_find_best_with_unlimited_depth(self):
         mcts.process_game(model5.game_vector)

@@ -3,6 +3,7 @@ import sys
 import threading
 import time
 import unittest
+from multiprocessing import Process
 
 from PyQt5.QtWidgets import QApplication
 
@@ -37,3 +38,12 @@ class TestQt5Graphic(unittest.TestCase):
         app = QApplication(sys.argv)
         ex = Qt5UserInterfaceAgent(SyncModule(board), disable_click_interface=False, click_handler=lambda _, __: True)
         sys.exit(app.exec())
+
+    def test_in_process(self):
+        process = Process(target=self.test_ui_mode, args=[])
+        process.start()
+        process.join()
+
+    def test_in_thread(self):
+        thread = threading.Thread(target=self.test_ui_mode, args=[])
+        thread.start()

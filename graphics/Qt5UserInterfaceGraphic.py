@@ -8,7 +8,7 @@ class Qt5UserInterfaceGraphic(Qt5Graphic):
         super().__init__(update_feq, False)
 
     def _get_ex(self) -> Qt5UserInterfaceAgent:
-        return Qt5UserInterfaceAgent(sync_module=self.sync_module,
+        return Qt5UserInterfaceAgent(sync_queue=self.sync_queue,
                                      disable_click_interface=False, click_handler=self._process_event,
                                      fps=self.update_feq)
 

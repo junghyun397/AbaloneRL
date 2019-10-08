@@ -1,16 +1,10 @@
 import threading
 from abc import abstractmethod, ABCMeta
+from queue import Queue
 
 import numpy as np
 
-
-class SyncModule:
-
-    def __init__(self, base_vector: np.ndarray):
-        self.base_vector = base_vector
-
-        self.run = True
-        self.sig_force_draw = False
+from graphics.QSyncManager import SyncBoard, SyncDraw, SyncKill, SyncInit
 
 
 class GraphicModule(metaclass=ABCMeta):
@@ -20,23 +14,27 @@ class GraphicModule(metaclass=ABCMeta):
         self.update_feq = update_feq
         self.feq_draw = not disable_auto_draw
 
-        self.sync_module = None
+        self.base_vector = None
+
+        self.sync_queue = Queue()
         self._main_thread = None
 
     def init_ui(self, base_vector: np.ndarray) -> None:
-        self.sync_module = SyncModule(base_vector)
+        self.base_vector = base_vector
+        self.sync_queue.put(SyncInit(base_vector))
 
         self._main_thread = self._build_task()
         self._main_thread.start()
 
     def update_game_vector(self, new_vector: np.ndarray) -> None:
-        self.sync_module.base_vector = new_vector
+        self.base_vector = new_vector
+        self.sync_queue.put(SyncBoard(new_vector))
 
     def manual_draw(self) -> None:
-        self.sync_module.sig_force_draw = True
+        self.sync_queue.put(SyncDraw(self.base_vector))
 
     def kill(self) -> None:
-        self.sync_module.run = False
+        self.sync_queue.put(SyncKill())
 
     @abstractmethod
     def _build_task(self) -> threading.Thread:

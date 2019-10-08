@@ -1,8 +1,11 @@
 import threading
 import time
 
+import numpy as np
+
 from abalone import FieldTemplate
 from graphics.GraphicModule import GraphicModule
+from graphics.QSyncManager import iteration_queue, SyncType
 
 
 class TextGraphic(GraphicModule):
@@ -21,18 +24,22 @@ class TextGraphic(GraphicModule):
         return task
 
     def _main_loop(self) -> None:
-        prv_time = time.time()
-        while self.sync_module.run:
-            if self.feq_draw and time.time() - prv_time > 1 / self.update_feq:
+        prv_time, run = time.time(), True
+        while run:
+            if time.time() - prv_time > 1 / self.update_feq:
+                for queue in iteration_queue(self.sync_queue):
+                    if queue.sync_type == SyncType.SYNC_DRAW:
+                        self._draw(queue.game_vector)
+                    elif self.feq_draw and queue.sync_type == SyncType.SYNC_BOARD:
+                        self._draw(queue.game_vector)
+                    elif queue.sync_type == SyncType.SYNC_KILL:
+                        run = False
+                        break
                 prv_time = time.time()
-                self._draw()
-            elif self.sync_module.sig_force_draw:
-                self.sync_module.sig_force_draw = False
-                self._draw()
 
-    def _draw(self) -> None:
+    def _draw(self, game_vector: np.ndarray) -> None:
         pass
 
-    def _initialized_draw(self) -> None:
-        print(FieldTemplate.get_text_board(self.sync_module.base_vector), "\n", self._info_text.format(
-            self.sync_module.base_vector[1], self.sync_module.base_vector[3], self.sync_module.base_vector[4]))
+    def _initialized_draw(self, game_vector: np.ndarray) -> None:
+        print(FieldTemplate.get_text_board(game_vector), "\n", self._info_text.format(
+            game_vector[1], game_vector[3], game_vector[4]))
