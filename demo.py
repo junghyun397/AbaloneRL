@@ -17,7 +17,7 @@ args = args_parser.parser.parse_args()
 if __name__ == '__main__':
     env = AbaloneEnvironment()
 
-    graphic = TextGraphic(disable_auto_draw=True) if args.graphic == "text" else Qt5Graphic(disable_auto_draw=True)
+    graphic = TextGraphic() if args.graphic == "text" else Qt5Graphic()
     graphic.init_ui(env.abalone_model.game_vector)
 
     game_success, game_total = 0, 0
@@ -30,7 +30,7 @@ if __name__ == '__main__':
         if end:
             total_game += 1
             if not total_game % 100:
-                graphic.manual_draw()
+                graphic.draw()
                 print("++total-game: {0}, local-success: {1}, local-turns: {2}".format(total_game, game_success, game_total))
-                graphic.update_game_vector(new_vector=env.abalone_model.game_vector)
+                graphic.update_game_vector(env.abalone_model.game_vector)
             game_success, game_total = 0, 0

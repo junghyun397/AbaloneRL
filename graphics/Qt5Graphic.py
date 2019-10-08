@@ -1,6 +1,6 @@
+import multiprocessing
 import os
 import sys
-import threading
 
 from PyQt5 import QtCore
 from PyQt5.QtWidgets import QApplication
@@ -12,16 +12,16 @@ from graphics.Qt5UserInterfaceAgent import Qt5UserInterfaceAgent
 class Qt5Graphic(GraphicModule):
 
     def __init__(self, update_feq: int = 20,
-                 disable_auto_draw: bool = False,
                  use_rescale: bool = True):
-        super().__init__(update_feq, disable_auto_draw)
+        super().__init__(update_feq)
 
         self.use_rescale = use_rescale
 
-    def _build_task(self) -> threading.Thread:
-        task = threading.Thread(target=self._run_pyqt5_ui, args=[])
-        task.daemon = True
-        return task
+    def _build_process(self) -> multiprocessing.Process:
+        process = multiprocessing.Process(target=self._run_pyqt5_ui, args=[])
+        process.daemon = True
+        process.name = "AbaloneRL Qt5 Visualizer"
+        return process
 
     def _run_pyqt5_ui(self) -> None:
         if self.use_rescale:
@@ -34,4 +34,4 @@ class Qt5Graphic(GraphicModule):
 
     def _get_ex(self) -> Qt5UserInterfaceAgent:
         return Qt5UserInterfaceAgent(sync_queue=self.sync_queue, fps=self.update_feq,
-                                     disable_click_interface=True, click_handler=lambda _: False)
+                                     disable_click_interface=True, click_handler=lambda _, __: False)

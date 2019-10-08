@@ -1,3 +1,4 @@
+import numpy as np
 from torch import nn
 
 from abalone import AbaloneModel
@@ -9,13 +10,17 @@ class HexConv2DLayer(nn.Module):
         super(HexConv2DLayer, self).__init__()
         self.kernel_size = kernel_size
         self.edge_size = edge_size
-
+        self.dilation = dilation
         self.padding = padding
         self.stride = stride
         self.shuffle = shuffle
-        self.unfold = nn.Unfold(kernel_size, dilation, padding, stride)
+
+        self.kernel = self._build_kernel(kernel_size, edge_size, padding, stride)
 
         self.get_1d_pos, _ = AbaloneModel.build_indexed_pos_method(edge_size)
 
-    def forward(self, x):
+    def _build_kernel(self, kernel_size: int, edge_size: int, padding: int, stride: int) -> np.ndarray:
         pass
+
+    def forward(self, x):
+        return x

@@ -1,4 +1,3 @@
-from queue import Queue
 from typing import Callable
 
 import numpy as np
@@ -8,7 +7,7 @@ from PyQt5.QtWidgets import QDesktopWidget, QWidget, QMainWindow, QHBoxLayout, Q
 
 from abalone import AbaloneModel
 from abalone.StoneColor import StoneColor
-from graphics.QSyncManager import SyncModule, iteration_queue, SyncType
+from graphics.QSyncManager import SyncType, iteration_queue
 
 OUTLINE_COLOR = {
     "NORMAL": QColor("#212121"),
@@ -80,16 +79,14 @@ class Qt5UserInterfaceAgent(QMainWindow):
 
     # noinspection PyArgumentList
     def __init__(self,
-                 sync_queue: Queue[SyncModule],
+                 sync_queue,
                  fps: int = 30,
-                 disable_auto_draw: bool = True,
                  disable_click_interface: bool = True,
                  click_handler: Callable[[int, int], bool] = lambda _, __: False,
                  block_size: int = 50):
         super(Qt5UserInterfaceAgent, self).__init__()
         self.sync_queue = sync_queue
         self.fps = fps
-        self.disable_auto_draw = disable_auto_draw
         self.disable_click_interface = disable_click_interface
         self.click_handler = click_handler
         self.block_size = block_size
@@ -176,7 +173,8 @@ class Qt5UserInterfaceAgent(QMainWindow):
     def update_status_bar(self, game_vector: np.ndarray):
         self.statusBar().showMessage("Turns: {0}; Drop Black: {1}; Drop White: {2}; Current Color: {3}"
                                      .format(game_vector[1], game_vector[3], game_vector[4],
-                                             "BLACK" if game_vector[2] == StoneColor.BLACK else "WHITE"))
+                                             "BLACK" if game_vector[2] == StoneColor.BLACK else
+                                             ("WHITE" if game_vector[2] == StoneColor.WHITE else "NONE")))
 
     # Board Control UI
 
@@ -193,8 +191,8 @@ class Qt5UserInterfaceAgent(QMainWindow):
         for index in range(len(self._abalone_cell)):
             f(self._abalone_cell[index], index)
 
-    def _detect_diff_board(self) -> bool:
-        board_hash = hash(self.sync_queue.base_vector.__str__())
+    def _detect_diff_board(self, game_vector: np.ndarray) -> bool:
+        board_hash = hash(game_vector.__str__())
         if self._prv_board_hash == board_hash:
             return False
         else:
@@ -205,7 +203,7 @@ class Qt5UserInterfaceAgent(QMainWindow):
 
     def _timer_tick(self):
         for queue in iteration_queue(self.sync_queue):
-            if queue.sync_type == SyncType.SYNC_DRAW:
+            if queue.sync_type == SyncType.SYNC_DRAW and self._detect_diff_board(queue.game_vector):
                 self.update_board(queue.game_vector)
             elif queue.sync_type == SyncType.SYNC_KILL:
                 exit()

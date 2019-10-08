@@ -1,5 +1,5 @@
+import queue
 from enum import Enum
-from queue import Queue
 from typing import Iterator
 
 import numpy as np
@@ -47,10 +47,9 @@ class SyncKill(SyncModule):
         super().__init__(SyncType.SYNC_KILL)
 
 
-def iteration_queue(queue: Queue[SyncModule]) -> Iterator[SyncModule]:
+def iteration_queue(target_queue) -> Iterator[SyncModule]:
     while True:
-        rq = queue.get()
-        if rq is not None:
-            yield rq
-        else:
+        try:
+            yield target_queue.get_nowait()
+        except queue.Empty:
             break
