@@ -1,6 +1,8 @@
 import random
 
 import args_parser
+from abalone import FieldTemplate
+from abalone.AbaloneModel import AbaloneAgent
 from abalone.env.AbaloneEnvironment import AbaloneEnvironment
 from graphics.Qt5Graphic import Qt5Graphic
 from graphics.TextGraphic import TextGraphic
@@ -10,12 +12,12 @@ def random_policy(action_space: int) -> list:
     return [random.randrange(0, action_space), random.randrange(0, action_space), random.randrange(0, action_space)]
 
 
-graphic_mode = "TEXT"
-
 args = args_parser.parser.parse_args()
 
 if __name__ == '__main__':
-    env = AbaloneEnvironment()
+    abalone_model = AbaloneAgent(edge_size=args.board_size,
+                                 vector_generator=FieldTemplate.basic_start)
+    env = AbaloneEnvironment(abalone_model)
 
     graphic = TextGraphic() if args.graphic == "text" else Qt5Graphic()
     graphic.init_ui(env.abalone_model.game_vector)
@@ -31,6 +33,7 @@ if __name__ == '__main__':
             total_game += 1
             if not total_game % 100:
                 graphic.draw()
-                print("++total-game: {0}, local-success: {1}, local-turns: {2}".format(total_game, game_success, game_total))
+                print("++total-game: {0}, local-success: {1}, local-turns: {2}"
+                      .format(total_game, game_success, game_total))
                 graphic.update_game_vector(env.abalone_model.game_vector)
             game_success, game_total = 0, 0

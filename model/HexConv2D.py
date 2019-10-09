@@ -15,12 +15,14 @@ class HexConv2DLayer(nn.Module):
         self.stride = stride
         self.shuffle = shuffle
 
-        self.kernel = self._build_kernel(kernel_size, edge_size, padding, stride)
+        self.kernel = self._build_kernel()
 
         self.get_1d_pos, _ = AbaloneModel.build_indexed_pos_method(edge_size)
 
-    def _build_kernel(self, kernel_size: int, edge_size: int, padding: int, stride: int) -> np.ndarray:
+    def _build_kernel(self) -> np.ndarray:
         pass
+
+    # Pytorch
 
     def forward(self, x):
         return x

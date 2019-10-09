@@ -15,6 +15,9 @@ PIXEL_WHITE = "#"
 PIXEL_NONE = "+"
 
 
+# Text-IO manager
+
+
 def get_text_board(game_vector: np.ndarray) -> str:
     rs_str = (chr(32) * (game_vector[0] + 2)) + str().join([str(i + 1) + chr(32) for i in range(game_vector[0])])
     tef, idx = (lambda w: PIXEL_NONE if w == StoneColor.NONE.value else
@@ -40,6 +43,13 @@ def load_text_board(info_vector: List[int], text_board: str) -> np.ndarray:
                         (StoneColor.BLACK.value if i == PIXEL_BLACK else
                         (StoneColor.WHITE.value if i == PIXEL_WHITE else None))
                         for i in itertools.chain(*text_board.split("\n")[::-1])])), dtype=AbaloneModel.FIELD_DTYPE)
+
+
+# Game-Vector generator
+
+
+def empty_start(edge_size: int) -> np.ndarray:
+    return AbaloneModel.new_vector(edge_size)
 
 
 def basic_start(edge_size: int) -> np.ndarray:

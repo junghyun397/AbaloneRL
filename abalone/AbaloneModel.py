@@ -1,5 +1,5 @@
 import math
-from typing import Callable, Tuple, Optional, Iterator
+from typing import Callable, Tuple, Optional, Iterator, List
 
 import numpy as np
 
@@ -182,6 +182,30 @@ class AbaloneAgent:
         elif self.game_vector[1] >= self.role_vector[0]:
             return StoneColor.NONE
         return None
+
+    # Select Logic
+
+    def can_select_stone(self, stones: List[Tuple[int, int]]) -> bool:
+        if len(stones) > self.role_vector[1]:
+            return False
+        elif len(stones) == 1 and self.get_field_stone(stones[0][0], stones[0][1]) == self.get_current_color():
+            return True
+
+        diff_y, diff_x = stones[0][0] - stones[1][0], stones[0][1] - stones[1][1]
+        if abs(diff_y) > 1 or abs(diff_x) > 1:
+            return False
+
+        prv_y, prv_x = stones[1]
+        for idx in range(2, len(stones)):
+            if not (stones[idx][0] - prv_y == diff_y and stones[idx][1] - prv_x == diff_x):
+                return False
+            prv_y, prv_x = stones[idx]
+
+        for y, x in stones:
+            if self.get_field_stone(y, x) != self.get_current_color():
+                return False
+
+        return True
 
     # Logic Filed Control
 
