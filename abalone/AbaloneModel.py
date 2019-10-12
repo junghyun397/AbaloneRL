@@ -1,8 +1,10 @@
 import math
+from copy import copy
 from typing import Callable, Tuple, Optional, Iterator, List
 
 import numpy as np
 
+from abalone.AbaloneRole import AbaloneRole
 from abalone.HexDescription import HexDescription
 from abalone.StoneColor import StoneColor
 
@@ -83,12 +85,6 @@ def build_indexed_pos_method(edge_size: int) -> (Callable[[int, int], int], Call
     return get_1d_pos, get_2d_pos
 
 
-def build_role_vector(max_turn: int = 1000,
-                      max_push_per_turn: int = 3,
-                      end_dropped_stone: int = 6):
-    return max_turn, max_push_per_turn, end_dropped_stone
-
-
 # Vector Generator
 
 def new_field(edge_size: int) -> np.ndarray:
@@ -108,22 +104,19 @@ def build_game_vector(edge_size: int,
     return np.array([edge_size, turns, current_color, out_black, out_white] + field, dtype=FIELD_DTYPE)
 
 
-# Role Vector Index
-# 0 max_turns, :: 1 movable_stone_pre_turn  :: 2 dropped_stone_for_end_game
-
 # Game Vector Index
 # 0 edge_size :: 1 turns :: 2 current color :: 3 out_black :: 4 out_white :: 5~ filed ~
 
 class AbaloneAgent:
 
     def __init__(self, edge_size: int = 5,
-                 role_vector: tuple = build_role_vector(),
+                 abalone_role: AbaloneRole = AbaloneRole(),
                  vector_generator: Callable[[int], np.ndarray] = new_vector,
                  use_indexed_pos: bool = True,
                  game_vector: np.ndarray = None):
         self.edge_size = edge_size
         self.vector_generator = vector_generator
-        self.role_vector = role_vector
+        self.abalone_role = abalone_role
         self.game_vector = game_vector if game_vector is not None else vector_generator(edge_size)
 
         self.field_size = get_field_size(edge_size)
@@ -144,7 +137,7 @@ class AbaloneAgent:
         self.game_vector = vector
 
     def copy(self):
-        return AbaloneAgent(edge_size=self.edge_size, role_vector=self.role_vector,
+        return AbaloneAgent(edge_size=self.edge_size, abalone_role=copy(self.abalone_role),
                             game_vector=np.copy(self.game_vector), vector_generator=self.vector_generator)
 
     def copy_vector(self) -> np.ndarray:
@@ -175,37 +168,37 @@ class AbaloneAgent:
     def next_turn(self) -> Optional[StoneColor]:
         self.game_vector[1] += 1
         self._flip_color()
-        if self.game_vector[4] >= self.role_vector[2]:
+        if self.game_vector[4] >= self.abalone_role.end_dropped_stone:
             return StoneColor.BLACK
-        elif self.game_vector[3] >= self.role_vector[2]:
+        elif self.game_vector[3] >= self.abalone_role.end_dropped_stone:
             return StoneColor.WHITE
-        elif self.game_vector[1] >= self.role_vector[0]:
+        elif self.game_vector[1] >= self.abalone_role.max_turns:
             return StoneColor.NONE
         return None
 
     # Select Logic
 
-    def can_select_stone(self, stones: List[Tuple[int, int]]) -> bool:
-        if len(stones) > self.role_vector[1]:
-            return False
+    def select_stone(self, stones: List[Tuple[int, int]]) -> Optional[List[List[Tuple[int, int]]]]:
+        if len(stones) < self.abalone_role.movable_stones:
+            return None
         elif len(stones) == 1 and self.get_field_stone(stones[0][0], stones[0][1]) == self.get_current_color():
-            return True
+            return [stones]
+
+        for y, x in stones:
+            if self.get_field_stone(y, x) != self.get_current_color():
+                return None
 
         diff_y, diff_x = stones[0][0] - stones[1][0], stones[0][1] - stones[1][1]
         if abs(diff_y) > 1 or abs(diff_x) > 1:
-            return False
+            return [[stones[0]], stones[1]]
 
         prv_y, prv_x = stones[1]
         for idx in range(2, len(stones)):
             if not (stones[idx][0] - prv_y == diff_y and stones[idx][1] - prv_x == diff_x):
-                return False
+                return [stones[:2], stones[2:]]
             prv_y, prv_x = stones[idx]
 
-        for y, x in stones:
-            if self.get_field_stone(y, x) != self.get_current_color():
-                return False
-
-        return True
+        return [stones]
 
     # Logic Filed Control
 
