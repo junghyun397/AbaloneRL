@@ -21,16 +21,16 @@ class AbaloneEnvironment(Environment):
     # success, drops, cut-put pos, is-win, is-end
 
     def action(self, action: List[int]) -> (List[Optional[np.ndarray]], Tuple[List[bool], List[int], int, bool, bool]):
-        stats = [None] * self.abalone_model.abalone_role[1]
-        success = [False] * self.abalone_model.abalone_role[1]
-        drops = [0] * self.abalone_model.abalone_role[1]
+        stats = [None] * self.abalone_model.abalone_role.movable_stones
+        success = [False] * self.abalone_model.abalone_role.movable_stones
+        drops = [0] * self.abalone_model.abalone_role.max_turns
         cut_out, end, win, c_move_stone = 0, False, False, 0
-        for i in range(self.abalone_model.abalone_role[1]):
+        for i in range(self.abalone_model.abalone_role.movable_stones):
             y, x, description = self.abalone_model.decode_action(action[i])
             success[i], move_stone, drops[i] = self.abalone_model.try_push_stone(y, x, description)
             c_move_stone += move_stone
             stats[i] = self.abalone_model.game_vector.copy()
-            if c_move_stone >= self.abalone_model.abalone_role[1]:
+            if c_move_stone >= self.abalone_model.abalone_role.movable_stones:
                 cut_out = i
                 break
 

@@ -11,6 +11,8 @@ class SyncType(Enum):
     SYNC_DRAW = 2
     SYNC_KILL = 3
 
+    SYNC_EVENT = 4
+
 
 class SyncModule:
 
@@ -45,6 +47,12 @@ class SyncKill(SyncModule):
 
     def __init__(self):
         super().__init__(SyncType.SYNC_KILL)
+
+
+class SyncUIEvent(SyncModule):
+
+    def __init__(self):
+        super().__init__(SyncType.SYNC_EVENT)
 
 
 def iteration_queue(target_queue) -> Iterator[SyncModule]:

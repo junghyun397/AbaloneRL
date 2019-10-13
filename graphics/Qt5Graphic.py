@@ -20,7 +20,7 @@ class Qt5Graphic(GraphicModule):
     def _build_process(self) -> multiprocessing.Process:
         process = multiprocessing.Process(target=self._run_pyqt5_ui, args=[])
         process.daemon = True
-        process.name = "AbaloneRL Qt5 Visualizer"
+        process.name = "AbaloneRL Qt5 Graphic-Visualizer"
         return process
 
     def _run_pyqt5_ui(self) -> None:
@@ -33,5 +33,4 @@ class Qt5Graphic(GraphicModule):
         sys.exit(app.exec_())
 
     def _get_ex(self) -> Qt5UserInterfaceAgent:
-        return Qt5UserInterfaceAgent(sync_queue=self.sync_queue, fps=self.update_feq,
-                                     disable_click_interface=True, click_handler=lambda _, __: False)
+        return Qt5UserInterfaceAgent(sync_queue=self.sync_queue, fps=self.update_feq)

@@ -1,16 +1,36 @@
 import argparse
 
-parser = argparse.ArgumentParser(description="AbaloneRL executable")
-parser.add_argument("-s", "--board-size", help="set Abalone-game board-size (default: 5)",
-                    type=int, default=5)
-parser.add_argument("-g", "--graphic", help="set graphic interface type (default: text)",
-                    type=str, default="text")
-parser.add_argument("-a", "--algorithm", help="set Algorithm type (default: alphazero)",
-                    type=str, default="alphazero")
+_parser = argparse.ArgumentParser(description="AbaloneRL executable")
+
+_parser.add_argument("-s", "--board-size", dest="board_size",
+                     help="set Abalone-game board-size (default: 5)",
+                     type=int, default=5)
 
 
-def add_train_option():
-    parser.add_argument("-b", "--batch-size", help="set training batch(replay)-size (default: 20)",
-                        type=int, default=20)
-    parser.add_argument("-l", "--learning-rate", help="set learning-rate (default: Adam Optimizer; 0.001)",
-                        type=float, default=0.001)
+def _add_graphic_option():
+    _parser.add_argument("-g", "--graphic", dest="graphic",
+                         help="set graphic interface type (default: text)",
+                         type=str, default="text")
+
+
+def _add_train_option():
+    _parser.add_argument("-a", "--algorithm", dest="algorithm",
+                         help="set Algorithm type (default: alphazero)",
+                         type=str, default="alphazero")
+    _parser.add_argument("-b", "--batch-size", dest="batch_size",
+                         help="set training batch(replay)-size (default: 20)",
+                         type=int, default=20)
+    _parser.add_argument("-l", "--learning-rate", dest="learning_rate",
+                         help="set learning-rate (default: Adam Optimizer; 0.001)",
+                         type=float, default=0.001)
+
+
+def get_parser(add_graphic_option=True,
+               add_train_option=False):
+
+    if add_graphic_option:
+        _add_graphic_option()
+    if add_train_option:
+        _add_train_option()
+
+    return _parser

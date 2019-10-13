@@ -1,3 +1,4 @@
+from multiprocessing import Queue
 from typing import Callable
 
 import numpy as np
@@ -79,16 +80,16 @@ class Qt5UserInterfaceAgent(QMainWindow):
 
     # noinspection PyArgumentList
     def __init__(self,
-                 sync_queue,
+                 sync_queue: Queue,
                  fps: int = 30,
                  disable_click_interface: bool = True,
-                 click_handler: Callable[[int, int], bool] = lambda _, __: False,
+                 ui_pipe: Queue = None,
                  block_size: int = 50):
         super(Qt5UserInterfaceAgent, self).__init__()
         self.sync_queue = sync_queue
         self.fps = fps
         self.disable_click_interface = disable_click_interface
-        self.click_handler = click_handler
+        self.ui_pipe = ui_pipe
         self.block_size = block_size
 
         init_data = sync_queue.get()
@@ -98,6 +99,8 @@ class Qt5UserInterfaceAgent(QMainWindow):
         self._abalone_cell = list()
         self._timer = None
         self._prv_board_hash = None
+
+        self._wait_ui_response = False
 
         self._init_ui()
         self.update_board(init_data.game_vector)
@@ -148,7 +151,7 @@ class Qt5UserInterfaceAgent(QMainWindow):
                 board_layout.addLayout(prv_layout)
                 prv_layout, prv_y = next_layout(y), y
 
-            cell = _Qt5AbaloneCell(self.block_size, lambda: self.click_handler(y, x))
+            cell = _Qt5AbaloneCell(self.block_size, lambda: True)
             prv_layout.addWidget(cell)
             self._abalone_cell.append(cell)
         board_layout.addLayout(prv_layout)
@@ -201,9 +204,12 @@ class Qt5UserInterfaceAgent(QMainWindow):
 
     # User Click-Interface
 
-    def _timer_tick(self):
+    def _timer_tick(self) -> None:
         for queue in iteration_queue(self.sync_queue):
             if queue.sync_type == SyncType.SYNC_DRAW and self._detect_diff_board(queue.game_vector):
                 self.update_board(queue.game_vector)
             elif queue.sync_type == SyncType.SYNC_KILL:
                 exit()
+
+    def _send_ui_request(self) -> None:
+        pass
