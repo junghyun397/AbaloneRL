@@ -1,5 +1,6 @@
 import queue
 from enum import Enum
+from multiprocessing import Queue
 from typing import Iterator
 
 import numpy as np
@@ -18,7 +19,6 @@ class SyncModule:
 
     def __init__(self, sync_type: SyncType):
         self.sync_type = sync_type
-        self.game_vector = None
 
 
 class SyncBoard(SyncModule):
@@ -55,7 +55,21 @@ class SyncUIEvent(SyncModule):
         super().__init__(SyncType.SYNC_EVENT)
 
 
-def iteration_queue(target_queue) -> Iterator[SyncModule]:
+class SyncClickEvent(SyncUIEvent):
+
+    def __init__(self, y: int, x: int):
+        super().__init__()
+
+        self.y, self.x = y, x
+
+
+class SyncEnterEvent(SyncUIEvent):
+
+    def __init__(self):
+        super().__init__()
+
+
+def iteration_queue(target_queue: Queue) -> Iterator:
     while True:
         try:
             yield target_queue.get_nowait()
