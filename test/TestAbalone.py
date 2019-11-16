@@ -2,11 +2,10 @@ import unittest
 
 import numpy as np
 
-from abalone import AbaloneModel
-from abalone.HexDescription import HexDescription
+from abalone import AbaloneModel, FieldTemplate
 
-model3 = AbaloneModel.AbaloneAgent(edge_size=3, vector_generator=AbaloneModel.new_vector)
-model5 = AbaloneModel.AbaloneAgent(edge_size=5, vector_generator=AbaloneModel.new_vector)
+model3 = AbaloneModel.AbaloneAgent(edge_size=3, vector_generator=FieldTemplate.empty_start)
+model5 = AbaloneModel.AbaloneAgent(edge_size=5, vector_generator=FieldTemplate.empty_start)
 
 # Convert Pos-Dimension resource
 model3_pos_list = [((0, 0), 0), ((1, 1), 4), ((3, 1), 12)]
@@ -64,15 +63,3 @@ class TestAbalone(unittest.TestCase):
     def field_size_2_edge_size(self):
         self.assertTrue(AbaloneModel.get_edge_size(model3.field_size), model3.edge_size)
         self.assertTrue(AbaloneModel.get_edge_size(model5.field_size), model5.edge_size)
-
-    def test_can_push_stone(self):
-        model3.can_push_stone(0, 0, HexDescription.XM)
-
-    def test_push_stone(self):
-        model3.try_push_stone(0, 0, HexDescription.XP)
-
-    def test_out_stone(self):
-        model3.try_push_stone(0, 0, HexDescription.XM)
-
-    def test_end_game(self):
-        model3.try_push_stone(0, 0, HexDescription.XP)

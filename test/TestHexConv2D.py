@@ -20,3 +20,9 @@ class TestHexConv2D(unittest.TestCase):
 
     def test_hex_conv_pth5(self):
         pass
+
+    def test_forward_model(self):
+        pass
+
+    def test_backward_model(self):
+        pass
