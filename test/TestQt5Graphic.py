@@ -10,7 +10,7 @@ from PyQt5.QtWidgets import QApplication
 
 from abalone import FieldTemplate
 from graphics.QSyncManager import SyncInit, SyncDraw
-from graphics.Qt5UserInterfaceAgent import Qt5UserInterfaceAgent
+from graphics.qt5.Qt5UserInterfaceAgent import Qt5UserInterfaceAgent
 
 
 def random_shift_worker(edge_size: int = 5, fps: int = 60, shift: int = 20) -> Callable[[], None]:
@@ -43,7 +43,7 @@ def random_shift_worker(edge_size: int = 5, fps: int = 60, shift: int = 20) -> C
 class TestQt5Graphic(unittest.TestCase):
 
     def test_in_process(self):
-        process = Process(target=random_shift_worker(), args=[])
+        process = Process(target=random_shift_worker(), args=())
         process.start()
         process.join()
 

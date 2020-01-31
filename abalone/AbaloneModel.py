@@ -4,7 +4,6 @@ from typing import Callable, Tuple, Optional, Iterator, List
 
 import numpy as np
 
-from abalone.AbaloneRole import AbaloneRole
 from abalone.HexDescription import HexDescription
 from abalone.StoneColor import StoneColor
 
@@ -102,6 +101,16 @@ def build_game_vector(edge_size: int,
                       out_white: int,
                       field: np.ndarray):
     return np.array([edge_size, turns, current_color, out_black, out_white] + field, dtype=FIELD_DTYPE)
+
+
+class AbaloneRole:
+
+    def __init__(self, max_turns: int = 1000,
+                 movable_stones: int = 3,
+                 end_dropped_stone: int = 6):
+        self.max_turns = max_turns
+        self.movable_stones = movable_stones
+        self.end_dropped_stone = end_dropped_stone
 
 
 # Game Vector Index

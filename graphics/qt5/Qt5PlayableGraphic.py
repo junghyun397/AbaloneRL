@@ -2,8 +2,8 @@ from multiprocessing import Queue
 from typing import Callable
 
 from graphics.QSyncManager import SyncUIEvent, iteration_queue
-from graphics.Qt5Graphic import Qt5Graphic
-from graphics.Qt5UserInterfaceAgent import Qt5UserInterfaceAgent
+from graphics.qt5.Qt5Graphic import Qt5Graphic
+from graphics.qt5.Qt5UserInterfaceAgent import Qt5UserInterfaceAgent
 
 
 class Qt5PlayableGraphic(Qt5Graphic):

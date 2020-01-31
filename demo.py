@@ -4,8 +4,8 @@ import args_parser
 from abalone import FieldTemplate
 from abalone.AbaloneModel import AbaloneAgent
 from abalone.env.AbaloneEnvironment import AbaloneEnvironment
-from graphics.Qt5Graphic import Qt5Graphic
-from graphics.TextGraphic import TextGraphic
+from graphics.qt5.Qt5Graphic import Qt5Graphic
+from graphics.text.TextGraphic import TextGraphic
 
 
 def random_policy(action_space: int) -> list:

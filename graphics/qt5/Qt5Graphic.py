@@ -6,7 +6,7 @@ from PyQt5 import QtCore
 from PyQt5.QtWidgets import QApplication
 
 from graphics.GraphicModule import GraphicModule
-from graphics.Qt5UserInterfaceAgent import Qt5UserInterfaceAgent
+from graphics.qt5.Qt5UserInterfaceAgent import Qt5UserInterfaceAgent
 
 
 class Qt5Graphic(GraphicModule):
@@ -18,7 +18,7 @@ class Qt5Graphic(GraphicModule):
         self.use_rescale = use_rescale
 
     def _build_process(self) -> multiprocessing.Process:
-        process = multiprocessing.Process(target=self._run_pyqt5_ui, args=[])
+        process = multiprocessing.Process(target=self._run_pyqt5_ui, args=())
         process.daemon = True
         process.name = "AbaloneRL Qt5 Graphic-Visualizer"
         return process
@@ -29,7 +29,7 @@ class Qt5Graphic(GraphicModule):
             QApplication.setAttribute(QtCore.Qt.AA_EnableHighDpiScaling, True)
 
         app = QApplication([])
-        ex = self._get_ex()
+        _ = self._get_ex()
         sys.exit(app.exec_())
 
     def _get_ex(self) -> Qt5UserInterfaceAgent:
