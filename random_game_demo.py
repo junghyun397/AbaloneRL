@@ -33,7 +33,7 @@ if __name__ == '__main__':
             total_game += 1
             if not total_game % 100:
                 graphic.draw()
-                print("++total-game: {0}, local-success: {1}, local-turns: {2}"
+                print("[+] total-game: {0}, local-success: {1}, local-turns: {2}\n"
                       .format(total_game, game_success, game_total))
-                graphic.update_game_vector(env.abalone_model.game_vector)
+                graphic.replace_game_vector(env.abalone_model.game_vector)
             game_success, game_total = 0, 0

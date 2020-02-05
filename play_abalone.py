@@ -1,5 +1,3 @@
-# TODO: implement play abalone
-
 import args_parser
 from abalone import FieldTemplate
 from abalone.AbaloneModel import AbaloneAgent
@@ -18,4 +16,4 @@ if __name__ == '__main__':
 
     while True:
         for event in iteration_queue(handler_queue):
-            pass
+            print(event[0], event[1])

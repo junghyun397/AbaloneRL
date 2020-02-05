@@ -14,11 +14,10 @@ class TextGraphic(GraphicModule):
                  use_info_text: bool = True):
         super().__init__(update_feq)
 
-        self._info_text = ">> Turns: {0}, Dropped black: {1}, Dropped white: {2}\n" if use_info_text else None
-        self._draw = self._initialized_draw
+        self._info_text = "[i] Turns: {0}, Dropped black: {1}, Dropped white: {2}\n" if use_info_text else None
 
     def _build_process(self) -> multiprocessing.Process:
-        process = multiprocessing.Process(target=self._main_loop, args=[])
+        process = multiprocessing.Process(target=self._main_loop, args=())
         process.daemon = True
         process.name = "AbaloneRL Text Visualizer"
         return process
@@ -36,8 +35,5 @@ class TextGraphic(GraphicModule):
                 prv_time = time.time()
 
     def _draw(self, game_vector: np.ndarray) -> None:
-        pass
-
-    def _initialized_draw(self, game_vector: np.ndarray) -> None:
         print(FieldTemplate.get_text_board(game_vector))
         print(self._info_text.format(game_vector[1], game_vector[3], game_vector[4]))

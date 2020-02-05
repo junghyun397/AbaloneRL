@@ -40,7 +40,7 @@ class _Qt5AbaloneCell(QWidget):
         self.setFixedSize(QSize(self.block_size, self.block_size))
         self.update()
 
-    # Event Handler
+    # event handle
 
     def paintEvent(self, q_paint_event: QPaintEvent):
         painter = QPainter(self)
@@ -58,7 +58,7 @@ class _Qt5AbaloneCell(QWidget):
         if self.click_handler() and q_mouse_event.button() == Qt.LeftButton:
             self.set_select(not self.selected)
 
-    # Cell Control
+    # cell control
 
     def reset_cell(self) -> None:
         self.cell_color = StoneColor.NONE
@@ -106,7 +106,7 @@ class Qt5UserInterfaceAgent(QMainWindow):
         self.update_board(init_data.game_vector)
         self._init_timer()
 
-    # Init UI
+    # init ui
 
     # noinspection PyArgumentList
     def _init_ui(self) -> None:
@@ -137,7 +137,7 @@ class Qt5UserInterfaceAgent(QMainWindow):
     # noinspection PyArgumentList
     def _init_abalone_board(self, board_layout: QVBoxLayout) -> None:
         # noinspection PyShadowingNames
-        def next_layout(y: int):
+        def next_layout(y: int) -> QHBoxLayout:
             new_layout = QHBoxLayout()
             new_layout.setAlignment(Qt.AlignLeft)
             new_layout.addSpacing((self.edge_size - y - 1 if y < self.edge_size else y - self.edge_size + 1)
@@ -145,13 +145,20 @@ class Qt5UserInterfaceAgent(QMainWindow):
             new_layout.setSpacing(self.block_size // 5)
             return new_layout
 
+        def build_on_click_cell(fy: int, fx: int) -> Callable[[], bool]:
+            def on_click_cell() -> bool:
+                self.ui_pipe.put([fy, fx])
+                return True
+
+            return on_click_cell
+
         prv_layout, prv_y = next_layout(0), 0
         for idx, y, x in AbaloneModel.pos_iterator(self.edge_size):
             if prv_y != y:
                 board_layout.addLayout(prv_layout)
                 prv_layout, prv_y = next_layout(y), y
 
-            cell = _Qt5AbaloneCell(self.block_size, lambda: True)
+            cell = _Qt5AbaloneCell(self.block_size, build_on_click_cell(y, x))
             prv_layout.addWidget(cell)
             self._abalone_cell.append(cell)
         board_layout.addLayout(prv_layout)
@@ -162,7 +169,7 @@ class Qt5UserInterfaceAgent(QMainWindow):
         self._timer.timeout.connect(self._timer_tick)
         self._timer.start(1000 // self.fps)
 
-    # Qt5 UI
+    # qt5 ui
 
     def update_board(self, game_vector: np.ndarray) -> None:
         self.update_status_bar(game_vector)
@@ -179,12 +186,12 @@ class Qt5UserInterfaceAgent(QMainWindow):
                                              "BLACK" if game_vector[2] == StoneColor.BLACK else
                                              ("WHITE" if game_vector[2] == StoneColor.WHITE else "NONE")))
 
-    # Board Control UI
+    # board control ui
 
     def reset_board(self) -> None:
         self._iteration_board(lambda cell: cell.reset_cell())
 
-    # Bin Control UI
+    # bin ui control
 
     def _iteration_board(self, f: Callable[[_Qt5AbaloneCell], None]) -> None:
         for cell in self._abalone_cell:
@@ -202,7 +209,7 @@ class Qt5UserInterfaceAgent(QMainWindow):
             self._prv_board_hash = board_hash
             return True
 
-    # User Click-Interface
+    # user click-interface
 
     def _timer_tick(self) -> None:
         for queue in iteration_queue(self.sync_queue):

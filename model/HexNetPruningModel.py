@@ -1,6 +1,6 @@
 import numpy as np
 
-from agent.PruningPolicy import PruningPolicy
+from agent.pruning.PruningPolicy import PruningPolicy
 from model.HexProbNetwork import HexProbNetwork
 
 

@@ -1,7 +1,7 @@
 import unittest
 
 from abalone import AbaloneModel, FieldTemplate
-from agent.RandomPruningPolicy import RandomPruningPolicy
+from agent.pruning.RandomPruningPolicy import RandomPruningPolicy
 from model.AbaloneMCTS import AbaloneMCTS
 
 model5 = AbaloneModel.AbaloneAgent(edge_size=5, vector_generator=FieldTemplate.basic_start)

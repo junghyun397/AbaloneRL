@@ -4,7 +4,7 @@ from typing import Dict, List
 import numpy as np
 
 from abalone import AbaloneModel
-from agent.PruningPolicy import PruningPolicy
+from agent.pruning.PruningPolicy import PruningPolicy
 
 
 def set_action_prob(x: Dict[int, float]) -> Dict[int, float]:

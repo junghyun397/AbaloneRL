@@ -1,4 +1,4 @@
-from agent.reward.RewardModule import RewardModule
+from agent.environment.reward.RewardModule import RewardModule
 
 
 class WinReward(RewardModule):

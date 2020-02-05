@@ -4,7 +4,7 @@ import numpy as np
 
 from abalone import AbaloneModel, FieldTemplate
 from abalone.StoneColor import StoneColor
-from agent.Environment import Environment
+from agent.environment.Environment import Environment
 
 
 class AbaloneEnvironment(Environment):

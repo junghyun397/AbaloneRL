@@ -3,7 +3,7 @@ from typing import Dict
 
 import numpy as np
 
-from agent.PruningPolicy import PruningPolicy
+from agent.pruning.PruningPolicy import PruningPolicy
 
 
 class RandomPruningPolicy(PruningPolicy):

@@ -2,7 +2,7 @@
 
 import args_parser
 from abalone.AbaloneModel import AbaloneAgent
-from agent.RandomPruningPolicy import RandomPruningPolicy
+from agent.pruning.RandomPruningPolicy import RandomPruningPolicy
 from graphics.qt5.Qt5Graphic import Qt5Graphic
 from graphics.text.TextGraphic import TextGraphic
 from model.AbaloneMCTS import AbaloneMCTS

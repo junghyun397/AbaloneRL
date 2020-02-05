@@ -24,7 +24,7 @@ class GraphicModule(metaclass=ABCMeta):
         self._graphic_process = self._build_process()
         self._graphic_process.start()
 
-    def update_game_vector(self, new_vector: np.ndarray) -> None:
+    def replace_game_vector(self, new_vector: np.ndarray) -> None:
         self.base_vector = new_vector
 
     def draw(self) -> None:
