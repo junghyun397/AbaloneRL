@@ -84,14 +84,32 @@ def build_indexed_pos_method(edge_size: int) -> (Callable[[int, int], int], Call
     return get_1d_pos, get_2d_pos
 
 
+class AbaloneRole:
+
+    def __init__(self, max_turns: int = 1000,
+                 movable_stones: int = 3,
+                 end_dropped_stone: int = 6,
+                 start_color: StoneColor = StoneColor.BLACK):
+        self.max_turns = max_turns
+        self.movable_stones = movable_stones
+        self.end_dropped_stone = end_dropped_stone
+        self.start_color = start_color
+
+
 # Vector Generator
 
 def new_field(edge_size: int) -> np.ndarray:
     return np.zeros((get_field_size(edge_size),), dtype=FIELD_DTYPE)
 
 
-def new_vector(edge_size: int) -> np.ndarray:
-    return np.array([edge_size] + [0] * (get_field_size(edge_size) + 4), dtype=FIELD_DTYPE)
+# noinspection PyTypeChecker
+def new_vector(edge_size: int, role: AbaloneRole = AbaloneRole()) -> np.ndarray:
+    return build_game_vector(edge_size=edge_size,
+                             turns=0,
+                             current_color=role.start_color.value,
+                             out_black=0,
+                             out_white=0,
+                             field=new_field(edge_size))
 
 
 def build_game_vector(edge_size: int,
@@ -100,17 +118,7 @@ def build_game_vector(edge_size: int,
                       out_black: int,
                       out_white: int,
                       field: np.ndarray):
-    return np.array([edge_size, turns, current_color, out_black, out_white] + field, dtype=FIELD_DTYPE)
-
-
-class AbaloneRole:
-
-    def __init__(self, max_turns: int = 1000,
-                 movable_stones: int = 3,
-                 end_dropped_stone: int = 6):
-        self.max_turns = max_turns
-        self.movable_stones = movable_stones
-        self.end_dropped_stone = end_dropped_stone
+    return np.concatenate([[edge_size, turns, current_color, out_black, out_white], field])
 
 
 # Game Vector Index
@@ -187,27 +195,27 @@ class AbaloneAgent:
 
     # Select Logic
 
-    def select_stone(self, stones: List[Tuple[int, int]]) -> Optional[List[List[Tuple[int, int]]]]:
-        if len(stones) < self.abalone_role.movable_stones:
-            return None
+    def can_select_stone(self, stones: List[Tuple[int, int]]) -> bool:
+        if len(stones) > self.abalone_role.movable_stones or len(stones) == 0:
+            return False
         elif len(stones) == 1 and self.get_field_stone(stones[0][0], stones[0][1]) == self.get_current_color():
-            return [stones]
+            return True
 
         for y, x in stones:
             if self.get_field_stone(y, x) != self.get_current_color():
-                return None
+                return False
 
         diff_y, diff_x = stones[0][0] - stones[1][0], stones[0][1] - stones[1][1]
         if abs(diff_y) > 1 or abs(diff_x) > 1:
-            return [[stones[0]], stones[1]]
+            return True
 
         prv_y, prv_x = stones[1]
         for idx in range(2, len(stones)):
             if not (stones[idx][0] - prv_y == diff_y and stones[idx][1] - prv_x == diff_x):
-                return [stones[:2], stones[2:]]
+                return True
             prv_y, prv_x = stones[idx]
 
-        return [stones]
+        return True
 
     # Logic Filed Control
 
@@ -238,6 +246,7 @@ class AbaloneAgent:
             else:
                 flp = True
                 om += 1
+
         return line if 4 > lm > om else None, lm, 1
 
     def push_stone(self, y: int, x: int, description: HexDescription, line: list = None) -> None:

@@ -8,7 +8,7 @@ from PyQt5.QtWidgets import QDesktopWidget, QWidget, QMainWindow, QHBoxLayout, Q
 
 from abalone import AbaloneModel
 from abalone.StoneColor import StoneColor
-from graphics.QSyncManager import SyncType, iteration_queue
+from graphics.QSyncManager import SyncType, iteration_queue, SyncClick
 
 OUTLINE_COLOR = {
     "NORMAL": QColor("#212121"),
@@ -55,8 +55,8 @@ class _Qt5AbaloneCell(QWidget):
                             self.block_size - self.out_line_size * 2, self.block_size - self.out_line_size * 2)
 
     def mouseReleaseEvent(self, q_mouse_event: QMouseEvent):
-        if self.click_handler() and q_mouse_event.button() == Qt.LeftButton:
-            self.set_select(not self.selected)
+        if q_mouse_event.button() == Qt.LeftButton:
+            self.click_handler()
 
     # cell control
 
@@ -81,7 +81,7 @@ class Qt5UserInterfaceAgent(QMainWindow):
     # noinspection PyArgumentList
     def __init__(self,
                  sync_queue: Queue,
-                 fps: int = 30,
+                 fps: int = 60,
                  disable_click_interface: bool = True,
                  ui_pipe: Queue = None,
                  block_size: int = 50):
@@ -99,6 +99,7 @@ class Qt5UserInterfaceAgent(QMainWindow):
         self._abalone_cell = list()
         self._timer = None
         self._prv_board_hash = None
+        self._get_1d_pos, _ = AbaloneModel.build_pos_method(self.edge_size)
 
         self._wait_ui_response = False
 
@@ -113,6 +114,11 @@ class Qt5UserInterfaceAgent(QMainWindow):
         self.setWindowTitle("AbaloneRL Qt5 "
                             + ("Visualizer" if self.disable_click_interface else "Graphic User Interface"))
         self.statusBar().showMessage("AbaloneRL, Ready")
+
+        self.setAutoFillBackground(True)
+        palette = self.palette()
+        palette.setColor(self.backgroundRole(), Qt.white)
+        self.setPalette(palette)
 
         center_weight = QWidget()
         horizon_layout = QHBoxLayout()
@@ -147,7 +153,7 @@ class Qt5UserInterfaceAgent(QMainWindow):
 
         def build_on_click_cell(fy: int, fx: int) -> Callable[[], bool]:
             def on_click_cell() -> bool:
-                self.ui_pipe.put([fy, fx])
+                self.ui_pipe.put(SyncClick(fy, fx))
                 return True
 
             return on_click_cell
@@ -167,7 +173,7 @@ class Qt5UserInterfaceAgent(QMainWindow):
     def _init_timer(self) -> None:
         self._timer = QTimer()
         self._timer.timeout.connect(self._timer_tick)
-        self._timer.start(1000 // self.fps)
+        self._timer.start(100 // self.fps)
 
     # qt5 ui
 
@@ -217,6 +223,8 @@ class Qt5UserInterfaceAgent(QMainWindow):
                 self.update_board(queue.game_vector)
             elif queue.sync_type == SyncType.SYNC_KILL:
                 exit()
+            elif queue.sync_type == SyncType.SYNC_SELECT:
+                self._abalone_cell[self._get_1d_pos(queue.y, queue.x)].set_select(queue.selected)
 
     def _send_ui_request(self) -> None:
         pass

@@ -12,16 +12,18 @@ class SyncType(Enum):
     SYNC_DRAW = 2
     SYNC_KILL = 3
 
-    SYNC_EVENT = 4
+    SYNC_CLICK = 4
+    SYNC_ENTER = 5
+    SYNC_SELECT = 6
 
 
-class SyncModule:
+class SyncData:
 
     def __init__(self, sync_type: SyncType):
         self.sync_type = sync_type
 
 
-class SyncBoard(SyncModule):
+class SyncBoard(SyncData):
 
     def __init__(self, game_vector: np.ndarray):
         super().__init__(SyncType.SYNC_BOARD)
@@ -43,30 +45,31 @@ class SyncDraw(SyncBoard):
         self.sync_type = SyncType.SYNC_DRAW
 
 
-class SyncKill(SyncModule):
+class SyncKill(SyncData):
 
     def __init__(self):
         super().__init__(SyncType.SYNC_KILL)
 
 
-class SyncUIEvent(SyncModule):
-
-    def __init__(self):
-        super().__init__(SyncType.SYNC_EVENT)
-
-
-class SyncClickEvent(SyncUIEvent):
+class SyncClick(SyncData):
 
     def __init__(self, y: int, x: int):
-        super().__init__()
-
+        super().__init__(SyncType.SYNC_CLICK)
         self.y, self.x = y, x
 
 
-class SyncEnterEvent(SyncUIEvent):
+class SyncEnter(SyncData):
 
     def __init__(self):
-        super().__init__()
+        super().__init__(SyncType.SYNC_ENTER)
+
+
+class SyncSelect(SyncData):
+
+    def __init__(self, selected: bool, y: int, x: int):
+        super().__init__(SyncType.SYNC_SELECT)
+        self.selected = selected
+        self.y, self.x = y, x
 
 
 def iteration_queue(target_queue: Queue) -> Iterator:

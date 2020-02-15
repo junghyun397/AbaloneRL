@@ -57,8 +57,8 @@ class TestAbalone(unittest.TestCase):
             self.assertEqual(model5.check_valid_pos(*n[0]), n[1])
 
     def test_to_vector(self):
-        self.assertTrue(np.array_equal(model3.game_vector, np.array([3] + [0]*(model3.field_size + 4), dtype=np.int8)))
-        self.assertTrue(np.array_equal(model5.game_vector, np.array([5] + [0]*(model5.field_size + 4), dtype=np.int8)))
+        self.assertTrue(np.array_equal(model3.game_vector, AbaloneModel.new_vector(3)))
+        self.assertTrue(np.array_equal(model5.game_vector, AbaloneModel.new_vector(5)))
 
     def field_size_2_edge_size(self):
         self.assertTrue(AbaloneModel.get_edge_size(model3.field_size), model3.edge_size)

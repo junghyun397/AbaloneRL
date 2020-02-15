@@ -1,7 +1,5 @@
 from multiprocessing import Queue
-from typing import Callable
 
-from graphics.QSyncManager import SyncUIEvent
 from graphics.qt5.Qt5Graphic import Qt5Graphic
 from graphics.qt5.Qt5UserInterfaceAgent import Qt5UserInterfaceAgent
 
@@ -9,11 +7,8 @@ from graphics.qt5.Qt5UserInterfaceAgent import Qt5UserInterfaceAgent
 class Qt5PlayableGraphic(Qt5Graphic):
 
     def __init__(self, update_feq: int = 20,
-                 use_rescale: bool = True,
-                 event_handler: Callable[[SyncUIEvent], bool] = lambda _: False):
+                 use_rescale: bool = True):
         super().__init__(update_feq, use_rescale)
-
-        self.event_handler = event_handler
 
         self.handler_queue = Queue()
 
