@@ -1,4 +1,2 @@
-PyQt5==5.13.1
-numpy==1.17.2
-torch==1.1.0
-gym==0.15.3
+PyQt5
+numpy
